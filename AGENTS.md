@@ -9,6 +9,9 @@ Shared UI primitives for Parivaar apps. **Source-only** — no `dist` build; eac
 | `Table`, `Col` | Generic data table (search, sort, CSV, print, pagination, row actions) |
 | `GrsTable` | Deprecated alias of `Table` (compat) |
 | `RowActions` | View / edit / delete icon buttons for table rows |
+| `ConfirmDialog` | In-app confirm overlay (replaces browser `confirm()`) |
+| `GrsModal` | Overlay + card shell (`title`, `onClose`, children) |
+| `GrsTabs` | Underline tab strip (`tabs`, `value`, `onChange`; optional badges) |
 | `styles` | Shared CSS-variable style tokens (`styles.btnPrimary`, `styles.th`, …) |
 | `useBfcacheReload` | Reload on bfcache restore; strip `?_=` after column-config Apply |
 
