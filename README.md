@@ -1,6 +1,6 @@
 # @parivaar/ui
 
-Shared React UI primitives for Parivaar apps. Source-only package — Vite in each app compiles the TypeScript.
+This package is the home for shared Parivaar UI (generic components and tokens used across apps). Source-only package — Vite in each app compiles the TypeScript.
 
 ## Install (local sibling)
 
