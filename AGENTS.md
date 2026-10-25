@@ -12,7 +12,7 @@ Shared UI primitives for Parivaar apps. **Source-only** — no `dist` build; eac
 | `ConfirmDialog` | In-app confirm overlay (replaces browser `confirm()`) |
 | `GrsModal` | Overlay + card shell (`title`, `onClose`, children) |
 | `GrsTabs` | Underline tab strip (`tabs`, `value`, `onChange`; optional badges) |
-| `ViewField`, `ViewSection`, `viewStyles` | Entity view-mode: shaded label chips, regular-weight values, blue section titles |
+| `ViewField`, `ViewSection`, `viewStyles` | Entity view-mode: bold labels, regular-weight values, blue section titles |
 | `styles` | Shared CSS-variable style tokens (`styles.btnPrimary`, `styles.th`, …) |
 | `useBfcacheReload` | Reload on bfcache restore; strip `?_=` after column-config Apply |
 

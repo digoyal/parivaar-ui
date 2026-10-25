@@ -7,20 +7,11 @@ import { styles } from "./styles";
 
 /** Style tokens for view-mode labels, values, and section titles. */
 export const viewStyles = {
-  /** Muted label text on a light shaded chip so values stand out. */
+  /** Bold muted label (no chip) so values stand out by weight contrast. */
   label: {
     ...styles.fieldLabel,
     color: "var(--text-secondary)",
-    fontWeight: 500,
-    background: "var(--bg-input)",
-    border: "1px solid var(--border)",
-    borderRadius: 4,
-    padding: "3px 8px",
-    marginBottom: 4,
-    display: "inline-block",
-    width: "fit-content",
-    maxWidth: "100%",
-    boxSizing: "border-box" as const,
+    fontWeight: 700,
   } as CSSProperties,
 
   /** Regular-weight primary text for read-only values. */
@@ -60,7 +51,7 @@ export interface ViewFieldProps {
   valueStyle?: CSSProperties;
 }
 
-/** One label chip + value for entity view mode. */
+/** One bold label + regular-weight value for entity view mode. */
 export function ViewField({
   label,
   children,
