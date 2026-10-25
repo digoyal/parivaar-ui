@@ -7,10 +7,14 @@ import { styles } from "./styles";
 
 /** Style tokens for view-mode labels, values, and section titles. */
 export const viewStyles = {
-  /** Bold muted label (no chip) so values stand out by weight contrast. */
+  /**
+   * Bold primary label (no chip). Muted secondary + 12px uppercase made
+   * fontWeight 700 nearly invisible next to darker/larger primary values;
+   * host apps often set font-synthesis:none so faux-bold does not help.
+   */
   label: {
     ...styles.fieldLabel,
-    color: "var(--text-secondary)",
+    color: "var(--text-primary)",
     fontWeight: 700,
   } as CSSProperties,
 
