@@ -1,4 +1,4 @@
-export { Table, GrsTable, type Col } from "./Table";
+export { Table, GrsTable, RowCountBadge, type Col } from "./Table";
 export { RowActions } from "./RowActions";
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog";
 export { GrsModal, type GrsModalProps } from "./GrsModal";

@@ -50,6 +50,11 @@ interface TableProps<T> {
   actions?: (row: T, idx: number) => { onView?: () => void; onEdit?: () => void; onDelete?: () => void; };
   /** Server-side pagination. When provided, replaces row-count footer with page controls. */
   pagination?: { page: number; pageSize: number; total: number; onPageChange: (p: number) => void };
+  /**
+   * Override total shown at the top (e.g. API grand total). Defaults to
+   * pagination.total when paged, else filtered/sorted row count.
+   */
+  totalCount?: number;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -91,6 +96,7 @@ export function Table<T extends object>({
   onAdd, addLabel = "+ Add", headerExtra,
   actions,
   pagination,
+  totalCount,
 }: TableProps<T>) {
 
   const [query, setQuery] = useState("");
@@ -177,12 +183,47 @@ export function Table<T extends object>({
 
   const hasSearch = searchable || filters;
 
+  // Top total: prefer explicit / API pagination total; else filtered view length.
+  const displayTotal =
+    totalCount ??
+    pagination?.total ??
+    (isLoading ? null : sorted.length);
+  const showFilteredHint =
+    !pagination &&
+    totalCount == null &&
+    !isLoading &&
+    data.length !== sorted.length;
+  const totalLabel =
+    displayTotal == null
+      ? null
+      : `${displayTotal.toLocaleString("en-IN")} ${displayTotal === 1 ? "row" : "rows"}`;
+
   return (
     <div>
-      {/* ── Page header: Title + Export + Print + Add all on one row ── */}
+      {/* ── Page header: Title + row total + Export + Print + Add ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 8 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>{title}</h1>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>{title}</h1>
+            {totalLabel && (
+              <span
+                style={{
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  color: "var(--text-secondary)",
+                  background: "var(--bg-input)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 6,
+                  padding: "2px 8px",
+                  whiteSpace: "nowrap",
+                }}
+                title={showFilteredHint ? `${sorted.length} matching of ${data.length} loaded` : undefined}
+              >
+                {totalLabel}
+                {showFilteredHint ? ` of ${data.length.toLocaleString("en-IN")}` : ""}
+              </span>
+            )}
+          </div>
           {subtitle && <p style={{ margin: "4px 0 0", ...styles.muted }}>{subtitle}</p>}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
@@ -352,20 +393,40 @@ export function Table<T extends object>({
             </div>
           );
         })()
-      ) : (
-        !isLoading && sorted.length > 0 && (
-          <p style={{ ...styles.muted, margin: "8px 0 0", textAlign: "right" }}>
-            {sorted.length} {sorted.length === 1 ? "record" : "records"}
-            {data.length !== sorted.length ? ` of ${data.length}` : ""}
-          </p>
-        )
-      )}
+      ) : null}
     </div>
   );
 }
 
 /** @deprecated Use `Table` instead. */
 export const GrsTable = Table;
+
+/** Compact “N rows” chip for hand-rolled tables (Lookups, reports, etc.). */
+export function RowCountBadge({
+  count,
+  style,
+}: {
+  count: number;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <span
+      style={{
+        fontSize: "0.8125rem",
+        fontWeight: 600,
+        color: "var(--text-secondary)",
+        background: "var(--bg-input)",
+        border: "1px solid var(--border)",
+        borderRadius: 6,
+        padding: "2px 8px",
+        whiteSpace: "nowrap",
+        ...style,
+      }}
+    >
+      {count.toLocaleString("en-IN")} {count === 1 ? "row" : "rows"}
+    </span>
+  );
+}
 
 function pageBtnStyle(disabled: boolean): React.CSSProperties {
   return {
