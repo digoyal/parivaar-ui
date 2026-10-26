@@ -2,6 +2,9 @@ import { useState, useMemo } from "react";
 import { styles } from "./styles";
 import { RowActions } from "./RowActions";
 
+/** Fits three 26px row-action buttons + gaps without overlapping Status. */
+const ACTIONS_COL_PX = 88;
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export interface Col<T> {
@@ -229,7 +232,8 @@ export function Table<T extends object>({
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            {/* auto layout + nowrap headers: columns size to labels (no “Statu:”); actions stay narrow */}
+            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto" }}>
               <thead>
                 <tr>
                   {columns.map(col => (
@@ -249,9 +253,16 @@ export function Table<T extends object>({
                   ))}
                   {actions && (
                     <th style={{
-                      ...styles.th, width: 96, textAlign: "right",
-                      position: "sticky", right: 0,
-                      background: "var(--bg-thead)", zIndex: 1,
+                      ...styles.th,
+                      width: ACTIONS_COL_PX,
+                      minWidth: ACTIONS_COL_PX,
+                      maxWidth: ACTIONS_COL_PX,
+                      padding: "8px 6px",
+                      textAlign: "right",
+                      position: "sticky",
+                      right: 0,
+                      background: "var(--bg-thead)",
+                      zIndex: 1,
                     }} />
                   )}
                 </tr>
@@ -259,7 +270,7 @@ export function Table<T extends object>({
               <tbody>
                 {sorted.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length}
+                    <td colSpan={columns.length + (actions ? 1 : 0)}
                         style={{ ...styles.td, padding: 40, textAlign: "center", color: "var(--text-secondary)" }}>
                       {emptyMessage}
                     </td>
@@ -278,10 +289,17 @@ export function Table<T extends object>({
                     ))}
                     {actions && (
                       <td style={{
-                        ...styles.td, textAlign: "right", width: 96,
-                        position: "sticky", right: 0,
+                        ...styles.td,
+                        textAlign: "right",
+                        width: ACTIONS_COL_PX,
+                        minWidth: ACTIONS_COL_PX,
+                        maxWidth: ACTIONS_COL_PX,
+                        padding: "6px 6px",
+                        position: "sticky",
+                        right: 0,
                         background: idx % 2 === 0 ? "var(--bg-card)" : "var(--bg-input)",
                         borderLeft: "1px solid var(--border)",
+                        overflow: "hidden",
                       }}>
                         <RowActions {...actions(row, idx)} />
                       </td>

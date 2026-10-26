@@ -74,17 +74,28 @@ export const styles = {
     color: "var(--text-secondary)", fontWeight: 500,
   } as CSSProperties,
 
+  /** Icon-only View/Edit/Delete in table rows — keep actions column narrow. */
+  btnRowAction: {
+    display: "inline-flex", alignItems: "center", justifyContent: "center",
+    width: 26, height: 26, padding: 0, border: "1px solid var(--border)",
+    borderRadius: 5, background: "var(--bg-input)",
+    cursor: "pointer", color: "var(--text-secondary)", flexShrink: 0,
+  } as CSSProperties,
+
   // ── Tables
   thead: { background: "var(--bg-thead)" } as CSSProperties,
 
   th: {
-    padding: "10px 12px", textAlign: "left" as const,
+    padding: "8px 10px", textAlign: "left" as const,
     fontWeight: 600, fontSize: 13, color: "var(--text-secondary)",
-    borderBottom: "2px solid var(--border)", whiteSpace: "nowrap" as const,
+    borderBottom: "2px solid var(--border)",
+    whiteSpace: "nowrap" as const,
+    overflow: "visible" as const,
+    textOverflow: "clip" as const,
   } as CSSProperties,
 
   td: {
-    padding: "10px 12px", textAlign: "left" as const, fontSize: 14, color: "var(--text-primary)",
+    padding: "8px 10px", textAlign: "left" as const, fontSize: 14, color: "var(--text-primary)",
     borderBottom: "1px solid var(--border)", verticalAlign: "middle" as const,
   } as CSSProperties,
 
