@@ -2,8 +2,8 @@ import { useState, useMemo } from "react";
 import { styles } from "./styles";
 import { RowActions } from "./RowActions";
 
-/** Fits three 26px row-action buttons + gaps without overlapping Status. */
-const ACTIONS_COL_PX = 88;
+/** Fits three 26px row-action buttons + gaps + cell padding (border-box). */
+const ACTIONS_COL_PX = 92;
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
