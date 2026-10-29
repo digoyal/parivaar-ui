@@ -33,18 +33,19 @@ export const styles = {
     textAlign: "left" as const,
   } as CSSProperties,
 
+  // fontSize 16+: iOS Safari auto-zooms focused controls under 16px
   input: {
     width: "100%", padding: "7px 10px", borderRadius: 6,
     border: "1px solid var(--border)",
     background: "var(--bg-input)", color: "var(--text-primary)",
-    fontSize: 14, boxSizing: "border-box" as const, outline: "none",
+    fontSize: 16, boxSizing: "border-box" as const, outline: "none",
   } as CSSProperties,
 
   select: {
     width: "100%", padding: "7px 10px", borderRadius: 6,
     border: "1px solid var(--border)",
     background: "var(--bg-input)", color: "var(--text-primary)",
-    fontSize: 14, boxSizing: "border-box" as const, cursor: "pointer",
+    fontSize: 16, boxSizing: "border-box" as const, cursor: "pointer",
   } as CSSProperties,
 
   // ── Buttons
@@ -105,14 +106,14 @@ export const styles = {
   // ── Search / filter bar
   searchInput: {
     padding: "7px 12px", border: "1.5px solid var(--border-input)",
-    borderRadius: 6, fontSize: "0.875rem",
+    borderRadius: 6, fontSize: 16,
     background: "var(--bg-card)", color: "var(--text-primary)",
     outline: "none", minWidth: 200,
   } as CSSProperties,
 
   filterSelect: {
     padding: "7px 10px", border: "1.5px solid var(--border-input)",
-    borderRadius: 6, fontSize: "0.875rem", width: 170, flexShrink: 0,
+    borderRadius: 6, fontSize: 16, width: 170, flexShrink: 0,
     background: "var(--bg-card)", color: "var(--text-primary)",
     cursor: "pointer",
   } as CSSProperties,
