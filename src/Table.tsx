@@ -38,6 +38,12 @@ interface TableProps<T> {
   onExternalSearch?: (q: string) => void;
   /** Extra filter controls rendered beside the search box. */
   filters?: React.ReactNode;
+  /**
+   * Count of non-default filter values (not search). On small screens the filter
+   * controls collapse behind a “Filters” toggle; when > 0 a badge is shown.
+   * Desktop always shows filters open. Persistence is owned by the page.
+   */
+  activeFilterCount?: number;
   /** Filename for CSV export (without .csv). Omit to hide export button. */
   exportFilename?: string;
   /** Title shown in the print window. Omit to hide print button. */
@@ -92,7 +98,7 @@ export function Table<T extends object>({
   columns, data, rowKey,
   isLoading, emptyMessage = "No records found.",
   searchable, searchPlaceholder = "Search…", searchFn, externalSearch, onExternalSearch,
-  filters, exportFilename, printTitle,
+  filters, activeFilterCount = 0, exportFilename, printTitle,
   onAdd, addLabel = "+ Add", headerExtra,
   actions,
   pagination,
@@ -102,6 +108,8 @@ export function Table<T extends object>({
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  /** Mobile only: filters start collapsed. Desktop CSS keeps `.grs-fbar` open. */
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // ── Filter (externalSearch = server-side; skip client filtering)
   const activeQuery = externalSearch !== undefined ? externalSearch : query;
@@ -244,12 +252,15 @@ export function Table<T extends object>({
         </div>
       </div>
 
-      {/* ── Search + filter bar (bordered container) ── */}
+      {/* ── Search + filter bar (filters collapse behind toggle on small screens) ── */}
       {hasSearch && (
-        <div style={{
-          display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center",
-          marginBottom: 16,
-        }}>
+        <div
+          className="grs-filter-row"
+          style={{
+            display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center",
+            marginBottom: 16,
+          }}
+        >
           {searchable && (
             <input
               placeholder={searchPlaceholder}
@@ -258,7 +269,30 @@ export function Table<T extends object>({
               style={styles.searchInput}
             />
           )}
-          {filters}
+          {filters ? (
+            <button
+              type="button"
+              className="grs-filter-toggle"
+              aria-expanded={filtersOpen}
+              aria-controls="grs-fbar"
+              onClick={() => setFiltersOpen((o) => !o)}
+            >
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="grs-filter-badge" aria-label={`${activeFilterCount} active`}>
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          ) : null}
+          {filters ? (
+            <div
+              id="grs-fbar"
+              className={`grs-fbar${filtersOpen ? "" : " grs-fbar--collapsed"}`}
+            >
+              {filters}
+            </div>
+          ) : null}
         </div>
       )}
 
