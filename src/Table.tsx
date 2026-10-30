@@ -173,10 +173,9 @@ export function Table<T extends object>({
     const measureShell = () => {
       const el = scrollWrapRef.current;
       const table = el?.querySelector("table");
-      const header = headerRef.current;
       const tw = table?.getBoundingClientRect().width ?? 0;
-      const hw = header?.scrollWidth ?? 0;
-      const w = Math.ceil(Math.max(tw, hw));
+      // Hug table width only — title toolbar is full-page flex and must not widen the card.
+      const w = Math.ceil(tw);
       setShellWidth(w > 0 ? w : undefined);
     };
     measureShell();
@@ -185,7 +184,6 @@ export function Table<T extends object>({
     if (el) ro.observe(el);
     const table = el?.querySelector("table");
     if (table) ro.observe(table);
-    if (headerRef.current) ro.observe(headerRef.current);
     return () => ro.disconnect();
   }, [columns, data, isLoading, sorted.length, searchable, filters]);
 
@@ -392,20 +390,24 @@ export function Table<T extends object>({
                     </th>
                   ))}
                   {actions && (
-                    <th style={{
-                      ...styles.th,
-                      width: ACTIONS_COL_PX,
-                      minWidth: ACTIONS_COL_PX,
-                      maxWidth: ACTIONS_COL_PX,
-                      padding: "8px 6px",
-                      textAlign: "right",
-                      ...(actionsSticky ? {
-                        position: "sticky",
-                        right: 0,
-                        background: "var(--bg-thead)",
-                        zIndex: 1,
-                      } : {}),
-                    }} />
+                    <th
+                      className="ui-thead-th grs-thead-th"
+                      style={{
+                        ...styles.th,
+                        width: ACTIONS_COL_PX,
+                        minWidth: ACTIONS_COL_PX,
+                        maxWidth: ACTIONS_COL_PX,
+                        padding: "8px 6px",
+                        textAlign: "right",
+                        ...(actionsSticky ? {
+                          position: "sticky",
+                          right: 0,
+                          zIndex: 1,
+                        } : {}),
+                      }}
+                    >
+                      Actions
+                    </th>
                   )}
                 </tr>
               </thead>
