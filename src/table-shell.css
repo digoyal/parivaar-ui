@@ -8,6 +8,15 @@
   min-width: 0;
 }
 
+/* List search: modest width beside filters; full width on phone */
+.grs-search-input {
+  box-sizing: border-box;
+  flex: 0 1 280px;
+  width: 100%;
+  max-width: 280px;
+  min-width: 0;
+}
+
 .grs-filter-toggle {
   display: none !important;
 }
@@ -37,6 +46,11 @@
 }
 
 @media (max-width: 640px) {
+  .grs-search-input {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
   .grs-filter-toggle {
     display: inline-flex !important;
     align-items: center;

@@ -108,7 +108,7 @@ export const styles = {
     padding: "7px 12px", border: "1.5px solid var(--border-input)",
     borderRadius: 6, fontSize: 16,
     background: "var(--bg-card)", color: "var(--text-primary)",
-    outline: "none", minWidth: 200,
+    outline: "none",
   } as CSSProperties,
 
   filterSelect: {

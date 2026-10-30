@@ -328,10 +328,11 @@ export function Table<T extends object>({
           >
             {searchable && (
               <input
+                className="grs-search-input"
                 placeholder={searchPlaceholder}
                 value={onExternalSearch ? (externalSearch ?? "") : query}
                 onChange={e => onExternalSearch ? onExternalSearch(e.target.value) : setQuery(e.target.value)}
-                style={{ ...styles.searchInput, flex: "1 1 180px", minWidth: 0, maxWidth: "100%" }}
+                style={styles.searchInput}
               />
             )}
             {filters ? (
