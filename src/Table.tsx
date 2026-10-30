@@ -210,7 +210,10 @@ export function Table<T extends object>({
       : `${displayTotal.toLocaleString("en-IN")} ${displayTotal === 1 ? "row" : "rows"}`;
 
   return (
-    <div>
+    <div
+      className="ui-table-shell"
+      style={{ width: "max-content", maxWidth: "100%" }}
+    >
       {/* ── Page header: Title + row total + Export + Print + Add ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 8 }}>
         <div style={{ minWidth: 0 }}>
