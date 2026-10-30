@@ -5,16 +5,31 @@
 }
 
 .grs-filter-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
 /* List search: modest width beside filters; full width on phone */
 .grs-search-input {
+  --grs-search-w: 260px;
   box-sizing: border-box;
-  flex: 0 1 280px;
-  width: 100%;
-  max-width: 280px;
+  flex: 0 0 var(--grs-search-w);
+  width: var(--grs-search-w);
+  max-width: var(--grs-search-w);
   min-width: 0;
+}
+
+/* Filter slot controls (Year, Class, checkboxes) — inline on desktop */
+.grs-filter-controls {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .grs-filter-toggle {
@@ -46,9 +61,19 @@
 }
 
 @media (max-width: 640px) {
+  .grs-filter-row {
+    flex-wrap: wrap;
+  }
+
+  .grs-filter-controls {
+    flex-wrap: wrap;
+  }
+
   .grs-search-input {
-    flex: 1 1 100%;
-    max-width: 100%;
+    --grs-search-w: 100%;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .grs-filter-toggle {

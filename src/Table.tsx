@@ -318,10 +318,8 @@ export function Table<T extends object>({
           <div
             className="grs-filter-row"
             style={{
-              display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center",
               padding: "10px 12px",
               borderBottom: "1px solid var(--border)",
-              minWidth: 0,
             }}
           >
             {searchable && (
@@ -330,7 +328,12 @@ export function Table<T extends object>({
                 placeholder={searchPlaceholder}
                 value={onExternalSearch ? (externalSearch ?? "") : query}
                 onChange={e => onExternalSearch ? onExternalSearch(e.target.value) : setQuery(e.target.value)}
-                style={styles.searchInput}
+                style={{
+                  ...styles.searchInput,
+                  /* Fallback cap if table-shell.css is missing; class sets --grs-search-w */
+                  width: "var(--grs-search-w, 260px)",
+                  maxWidth: "var(--grs-search-w, 260px)",
+                }}
               />
             )}
             {filters ? (
