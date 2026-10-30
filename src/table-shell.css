@@ -14,12 +14,21 @@
 
 /* List search: modest width beside filters; full width on phone */
 .grs-search-input {
-  --grs-search-w: 260px;
+  --grs-search-w: 220px;
   box-sizing: border-box;
   flex: 0 0 var(--grs-search-w);
   width: var(--grs-search-w);
   max-width: var(--grs-search-w);
   min-width: 0;
+}
+
+@media (min-width: 641px) {
+  .grs-filter-row > .grs-search-input {
+    flex: 0 0 var(--grs-search-w) !important;
+    width: var(--grs-search-w) !important;
+    max-width: var(--grs-search-w) !important;
+    flex-grow: 0 !important;
+  }
 }
 
 /* Filter slot controls (Year, Class, checkboxes) — inline on desktop */

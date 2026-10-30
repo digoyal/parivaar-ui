@@ -330,9 +330,12 @@ export function Table<T extends object>({
                 onChange={e => onExternalSearch ? onExternalSearch(e.target.value) : setQuery(e.target.value)}
                 style={{
                   ...styles.searchInput,
+                  flex: "0 0 var(--grs-search-w, 220px)",
+                  flexGrow: 0,
+                  flexShrink: 0,
                   /* Fallback cap if table-shell.css is missing; class sets --grs-search-w */
-                  width: "var(--grs-search-w, 260px)",
-                  maxWidth: "var(--grs-search-w, 260px)",
+                  width: "var(--grs-search-w, 220px)",
+                  maxWidth: "var(--grs-search-w, 220px)",
                 }}
               />
             )}
