@@ -12,7 +12,12 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./table-shell.css": "./src/table-shell.css"
+    "./table-shell.css": {
+      "development": "./src/table-shell.css",
+      "production": "./src/table-shell.css",
+      "import": "./src/table-shell.css",
+      "default": "./src/table-shell.css"
+    }
   },
   "files": [
     "src"
