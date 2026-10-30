@@ -5,6 +5,9 @@ import { RowActions } from "./RowActions";
 /** Fits three 26px row-action buttons + gaps + cell padding (border-box). */
 const ACTIONS_COL_PX = 92;
 
+/** Soft cap so one long value does not stretch sparse tables; wide lists still scroll. */
+const DATA_COL_MAX_PX = 360;
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export interface Col<T> {
@@ -307,8 +310,14 @@ export function Table<T extends object>({
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            {/* auto layout + nowrap headers: columns size to labels (no “Statu:”); actions stay narrow */}
-            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto" }}>
+            {/*
+              max-content width: few-column lists hug labels (no full-card column stretch).
+              Many columns overflow this wrapper horizontally. auto + nowrap headers keep labels intact.
+            */}
+            <table
+              className="ui-table"
+              style={{ width: "max-content", maxWidth: "none", borderCollapse: "collapse", tableLayout: "auto" }}
+            >
               <thead>
                 <tr>
                   {columns.map(col => (
@@ -317,6 +326,8 @@ export function Table<T extends object>({
                       className="ui-thead-th grs-thead-th"
                       style={{
                         ...styles.th,
+                        width: "1%",
+                        maxWidth: DATA_COL_MAX_PX,
                         cursor: col.sortable ? "pointer" : "default",
                         userSelect: "none",
                       }}
@@ -356,7 +367,16 @@ export function Table<T extends object>({
                     style={{ background: idx % 2 === 0 ? "var(--bg-card)" : "var(--bg-input)" }}
                   >
                     {columns.map(col => (
-                      <td key={col.key} style={{ ...styles.td, ...col.tdStyle }}>
+                      <td
+                        key={col.key}
+                        style={{
+                          ...styles.td,
+                          width: "1%",
+                          maxWidth: DATA_COL_MAX_PX,
+                          wordBreak: "break-word",
+                          ...col.tdStyle,
+                        }}
+                      >
                         {col.render
                           ? col.render(row, idx)
                           : String((row as Record<string, unknown>)[col.key] ?? "—")}

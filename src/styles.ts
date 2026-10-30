@@ -87,7 +87,7 @@ export const styles = {
   thead: { background: "var(--bg-thead)" } as CSSProperties,
 
   th: {
-    padding: "8px 10px", textAlign: "left" as const,
+    padding: "8px 8px", textAlign: "left" as const,
     fontWeight: 600, fontSize: 13, color: "var(--text-secondary)",
     borderBottom: "2px solid var(--border)",
     whiteSpace: "nowrap" as const,
@@ -96,7 +96,7 @@ export const styles = {
   } as CSSProperties,
 
   td: {
-    padding: "8px 10px", textAlign: "left" as const, fontSize: 14, color: "var(--text-primary)",
+    padding: "7px 8px", textAlign: "left" as const, fontSize: 14, color: "var(--text-primary)",
     borderBottom: "1px solid var(--border)", verticalAlign: "middle" as const,
   } as CSSProperties,
 
