@@ -117,7 +117,10 @@ export function Table<T extends object>({
   const [filtersOpen, setFiltersOpen] = useState(false);
   /** Sticky actions only when the table overflows horizontally (avoids a wide gap when the table is narrow). */
   const scrollWrapRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const [actionsSticky, setActionsSticky] = useState(false);
+  /** Match toolbar + filter bar to table width (not full viewport / empty card chrome). */
+  const [shellWidth, setShellWidth] = useState<number | undefined>();
 
   // ── Filter (externalSearch = server-side; skip client filtering)
   const activeQuery = externalSearch !== undefined ? externalSearch : query;
@@ -155,16 +158,36 @@ export function Table<T extends object>({
       setActionsSticky(false);
       return;
     }
-    const measure = () => {
+    const measureSticky = () => {
       setActionsSticky(el.scrollWidth > el.clientWidth + 1);
     };
-    measure();
-    const ro = new ResizeObserver(measure);
+    measureSticky();
+    const ro = new ResizeObserver(measureSticky);
     ro.observe(el);
     const table = el.querySelector("table");
     if (table) ro.observe(table);
     return () => ro.disconnect();
   }, [actions, columns, data, isLoading, sorted.length]);
+
+  useLayoutEffect(() => {
+    const measureShell = () => {
+      const el = scrollWrapRef.current;
+      const table = el?.querySelector("table");
+      const header = headerRef.current;
+      const tw = table?.getBoundingClientRect().width ?? 0;
+      const hw = header?.scrollWidth ?? 0;
+      const w = Math.ceil(Math.max(tw, hw));
+      setShellWidth(w > 0 ? w : undefined);
+    };
+    measureShell();
+    const ro = new ResizeObserver(measureShell);
+    const el = scrollWrapRef.current;
+    if (el) ro.observe(el);
+    const table = el?.querySelector("table");
+    if (table) ro.observe(table);
+    if (headerRef.current) ro.observe(headerRef.current);
+    return () => ro.disconnect();
+  }, [columns, data, isLoading, sorted.length, searchable, filters]);
 
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -231,13 +254,18 @@ export function Table<T extends object>({
       ? null
       : `${displayTotal.toLocaleString("en-IN")} ${displayTotal === 1 ? "row" : "rows"}`;
 
+  const shellStyle: React.CSSProperties = {
+    width: shellWidth ?? "max-content",
+    maxWidth: "100%",
+  };
+
   return (
-    <div
-      className="ui-table-shell"
-      style={{ width: "max-content", maxWidth: "100%" }}
-    >
+    <div className="ui-table-shell" style={shellStyle}>
       {/* ── Page header: Title + row total + Export + Print + Add ── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 8 }}>
+      <div
+        ref={headerRef}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 8 }}
+      >
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>{title}</h1>
@@ -280,57 +308,58 @@ export function Table<T extends object>({
         </div>
       </div>
 
-      {/* ── Search + filter bar (filters collapse behind toggle on small screens) ── */}
-      {hasSearch && (
-        <div
-          className="grs-filter-row"
-          style={{
-            display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center",
-            marginBottom: 16,
-          }}
-        >
-          {searchable && (
-            <input
-              placeholder={searchPlaceholder}
-              value={onExternalSearch ? (externalSearch ?? "") : query}
-              onChange={e => onExternalSearch ? onExternalSearch(e.target.value) : setQuery(e.target.value)}
-              style={styles.searchInput}
-            />
-          )}
-          {filters ? (
-            <button
-              type="button"
-              className="grs-filter-toggle"
-              aria-expanded={filtersOpen}
-              aria-controls="grs-fbar"
-              onClick={() => setFiltersOpen((o) => !o)}
-            >
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="grs-filter-badge" aria-label={`${activeFilterCount} active`}>
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-          ) : null}
-          {filters ? (
-            <div
-              id="grs-fbar"
-              className={`grs-fbar${filtersOpen ? "" : " grs-fbar--collapsed"}`}
-            >
-              {filters}
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      {/* ── Table ── */}
+      {/* ── Table card (search/filters sit inside so width matches the grid) ── */}
       <div style={{
         background: "var(--bg-card)",
         border: "1px solid var(--border)",
         borderRadius: 10,
         overflow: "hidden",
+        ...shellStyle,
       }}>
+        {hasSearch && (
+          <div
+            className="grs-filter-row"
+            style={{
+              display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center",
+              padding: "10px 12px",
+              borderBottom: "1px solid var(--border)",
+              minWidth: 0,
+            }}
+          >
+            {searchable && (
+              <input
+                placeholder={searchPlaceholder}
+                value={onExternalSearch ? (externalSearch ?? "") : query}
+                onChange={e => onExternalSearch ? onExternalSearch(e.target.value) : setQuery(e.target.value)}
+                style={{ ...styles.searchInput, flex: "1 1 180px", minWidth: 0, maxWidth: "100%" }}
+              />
+            )}
+            {filters ? (
+              <button
+                type="button"
+                className="grs-filter-toggle"
+                aria-expanded={filtersOpen}
+                aria-controls="grs-fbar"
+                onClick={() => setFiltersOpen((o) => !o)}
+              >
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="grs-filter-badge" aria-label={`${activeFilterCount} active`}>
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            ) : null}
+            {filters ? (
+              <div
+                id="grs-fbar"
+                className={`grs-fbar${filtersOpen ? "" : " grs-fbar--collapsed"}`}
+              >
+                {filters}
+              </div>
+            ) : null}
+          </div>
+        )}
         {isLoading ? (
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
