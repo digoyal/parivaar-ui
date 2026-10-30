@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useLayoutEffect } from "react";
 import { styles } from "./styles";
 import { RowActions } from "./RowActions";
 
@@ -22,6 +22,8 @@ export interface Col<T> {
   sortValue?: (row: T) => string | number;
   /** Extra td style overrides. */
   tdStyle?: React.CSSProperties;
+  /** Keep cell on one line (names, status badges, codes). Long values ellipsize in the cell. */
+  nowrap?: boolean;
 }
 
 interface TableProps<T> {
@@ -113,6 +115,9 @@ export function Table<T extends object>({
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   /** Mobile only: filters start collapsed. Desktop CSS keeps `.grs-fbar` open. */
   const [filtersOpen, setFiltersOpen] = useState(false);
+  /** Sticky actions only when the table overflows horizontally (avoids a wide gap when the table is narrow). */
+  const scrollWrapRef = useRef<HTMLDivElement>(null);
+  const [actionsSticky, setActionsSticky] = useState(false);
 
   // ── Filter (externalSearch = server-side; skip client filtering)
   const activeQuery = externalSearch !== undefined ? externalSearch : query;
@@ -143,6 +148,23 @@ export function Table<T extends object>({
       return sortDir === "asc" ? cmp : -cmp;
     });
   }, [filtered, sortKey, sortDir, columns]);
+
+  useLayoutEffect(() => {
+    const el = scrollWrapRef.current;
+    if (!el || !actions) {
+      setActionsSticky(false);
+      return;
+    }
+    const measure = () => {
+      setActionsSticky(el.scrollWidth > el.clientWidth + 1);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    const table = el.querySelector("table");
+    if (table) ro.observe(table);
+    return () => ro.disconnect();
+  }, [actions, columns, data, isLoading, sorted.length]);
 
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -312,7 +334,7 @@ export function Table<T extends object>({
         {isLoading ? (
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <div ref={scrollWrapRef} style={{ overflowX: "auto" }}>
             {/*
               max-content width: few-column lists hug labels (no full-card column stretch).
               Many columns overflow this wrapper horizontally. auto + nowrap headers keep labels intact.
@@ -329,8 +351,7 @@ export function Table<T extends object>({
                       className="ui-thead-th grs-thead-th"
                       style={{
                         ...styles.th,
-                        width: "1%",
-                        maxWidth: DATA_COL_MAX_PX,
+                        maxWidth: col.nowrap ? undefined : DATA_COL_MAX_PX,
                         cursor: col.sortable ? "pointer" : "default",
                         userSelect: "none",
                       }}
@@ -348,10 +369,12 @@ export function Table<T extends object>({
                       maxWidth: ACTIONS_COL_PX,
                       padding: "8px 6px",
                       textAlign: "right",
-                      position: "sticky",
-                      right: 0,
-                      background: "var(--bg-thead)",
-                      zIndex: 1,
+                      ...(actionsSticky ? {
+                        position: "sticky",
+                        right: 0,
+                        background: "var(--bg-thead)",
+                        zIndex: 1,
+                      } : {}),
                     }} />
                   )}
                 </tr>
@@ -374,9 +397,12 @@ export function Table<T extends object>({
                         key={col.key}
                         style={{
                           ...styles.td,
-                          width: "1%",
-                          maxWidth: DATA_COL_MAX_PX,
-                          wordBreak: "break-word",
+                          maxWidth: col.nowrap ? undefined : DATA_COL_MAX_PX,
+                          wordBreak: "normal",
+                          overflowWrap: col.nowrap ? "normal" : "anywhere",
+                          ...(col.nowrap
+                            ? { whiteSpace: "nowrap" as const }
+                            : {}),
                           ...col.tdStyle,
                         }}
                       >
@@ -393,10 +419,13 @@ export function Table<T extends object>({
                         minWidth: ACTIONS_COL_PX,
                         maxWidth: ACTIONS_COL_PX,
                         padding: "6px 6px",
-                        position: "sticky",
-                        right: 0,
+                        ...(actionsSticky ? {
+                          position: "sticky",
+                          right: 0,
+                          zIndex: 1,
+                        } : {}),
                         background: idx % 2 === 0 ? "var(--bg-card)" : "var(--bg-input)",
-                        borderLeft: "1px solid var(--border)",
+                        borderLeft: actionsSticky ? "1px solid var(--border)" : undefined,
                         overflow: "hidden",
                       }}>
                         <RowActions {...actions(row, idx)} />

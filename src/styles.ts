@@ -122,6 +122,7 @@ export const styles = {
   badge: {
     display: "inline-block", padding: "2px 8px",
     borderRadius: 9999, fontSize: 11, fontWeight: 600,
+    whiteSpace: "nowrap" as const,
   } as CSSProperties,
 
   errorBox: {
