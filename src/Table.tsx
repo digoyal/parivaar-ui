@@ -121,6 +121,8 @@ export function Table<T extends object>({
   const [actionsSticky, setActionsSticky] = useState(false);
   /** Match toolbar + filter bar to table width (not full viewport / empty card chrome). */
   const [shellWidth, setShellWidth] = useState<number | undefined>();
+  /** Phone/tablet: full-width card; desktop may hug sparse column sets. */
+  const [fullWidthShell, setFullWidthShell] = useState(false);
 
   // ── Filter (externalSearch = server-side; skip client filtering)
   const activeQuery = externalSearch !== undefined ? externalSearch : query;
@@ -170,6 +172,18 @@ export function Table<T extends object>({
   }, [actions, columns, data, isLoading, sorted.length]);
 
   useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const sync = () => setFullWidthShell(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (fullWidthShell) {
+      setShellWidth(undefined);
+      return;
+    }
     const measureShell = () => {
       const el = scrollWrapRef.current;
       const table = el?.querySelector("table");
@@ -185,7 +199,7 @@ export function Table<T extends object>({
     const table = el?.querySelector("table");
     if (table) ro.observe(table);
     return () => ro.disconnect();
-  }, [columns, data, isLoading, sorted.length, searchable, filters]);
+  }, [columns, data, isLoading, sorted.length, searchable, filters, fullWidthShell]);
 
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -253,7 +267,7 @@ export function Table<T extends object>({
       : `${displayTotal.toLocaleString("en-IN")} ${displayTotal === 1 ? "row" : "rows"}`;
 
   const shellStyle: React.CSSProperties = {
-    width: shellWidth ?? "max-content",
+    width: fullWidthShell ? "100%" : (shellWidth ?? "max-content"),
     maxWidth: "100%",
   };
 
