@@ -1,0 +1,59 @@
+/* @parivaar/ui ReportPageShell — filter bar layout (import once in app entry) */
+
+.grs-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.grs-report-filters .grs-fbar.grs-form {
+  gap: 10px;
+  align-items: flex-end;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.grs-report-shell {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .grs-report-filters .grs-fbar.grs-form > div {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .grs-report-filters .grs-filter-toggle {
+    flex: 1 1 100%;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .grs-report-filters .grs-filter-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .grs-report-filters .grs-filter-chevron {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text-secondary, #4a5568);
+  }
+}

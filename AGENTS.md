@@ -15,6 +15,9 @@ Shared UI primitives for Parivaar apps. **Source-only** — no `dist` build; eac
 | `ViewField`, `ViewSection`, `viewStyles` | Entity view-mode: bold labels, regular-weight values, blue section titles |
 | `styles` | Shared CSS-variable style tokens (`styles.btnPrimary`, `styles.th`, …) |
 | `useBfcacheReload` | Reload on bfcache restore; strip `?_=` after column-config Apply |
+| `FormSubmitError` | Validation/save error banner above Cancel/Save (class `grs-form-submit-error`) |
+| `FormPageShell`, `FormPageActions` | Add/Edit page chrome: optional `header`, `children`, error + Cancel/Save footer |
+| `ReportPageShell`, `ReportFiltersBar` | Report chrome: `title`/`header`, collapsible `filters`, `toolbar`, loading/empty/error, optional `exportActions`; import `@parivaar/ui/report-shell.css` once in the app entry (with `table-shell.css`) |
 
 ## Peer deps
 
@@ -25,4 +28,4 @@ Shared UI primitives for Parivaar apps. **Source-only** — no `dist` build; eac
 1. **No app imports** — this package must not import from KutirGRS or any other app.
 2. **Source-only** — keep `"exports"` / `"types"` pointed at `./src/index.ts`; do not add a build step.
 3. **Theme via CSS vars** — host apps define `--bg-card`, `--text-primary`, `--border`, etc. Do not hardcode product names or Kutir/GRS copy.
-4. **App-specific UI stays in apps** — forms, geo filters, role matrix, visit/admission flows are not packaged here.
+4. **App-specific UI stays in apps** — entity forms, geo filter *fields*, role matrix, visit/admission flows are not packaged here. Shared report *chrome* (page shell, collapsible filter bar) lives here; filter field markup stays in the app.

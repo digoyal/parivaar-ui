@@ -17,6 +17,12 @@
       "production": "./src/table-shell.css",
       "import": "./src/table-shell.css",
       "default": "./src/table-shell.css"
+    },
+    "./report-shell.css": {
+      "development": "./src/report-shell.css",
+      "production": "./src/report-shell.css",
+      "import": "./src/report-shell.css",
+      "default": "./src/report-shell.css"
     }
   },
   "files": [
