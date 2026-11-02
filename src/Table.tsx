@@ -27,6 +27,8 @@ export interface Col<T> {
   tdStyle?: React.CSSProperties;
   /** Keep cell on one line (names, status badges, codes). Long values ellipsize in the cell. */
   nowrap?: boolean;
+  /** Allow mid-cell wrapping (e.g. long notes). List hubs default to single-line + ellipsis unless wrap is set. */
+  wrap?: boolean;
   /** Minimum column width (px or CSS length). Prefer with nowrap on list-hub tables so grow col absorbs shrink. */
   minWidth?: number | string;
 }
@@ -84,6 +86,56 @@ const SortIcon = ({ dir }: { dir: "asc" | "desc" | null }) => (
 );
 
 function csvEscape(v: string) { return `"${v.replace(/"/g, '""')}"`; }
+
+/** List-hub desktop: default nowrap + ellipsis; sparse/mobile tables keep wrap-anywhere unless col opts in. */
+function colTextCellStyle<T>(
+  col: Col<T>,
+  listHubDesktop: boolean,
+): React.CSSProperties {
+  const allowWrap = col.wrap === true;
+  const nowrap = allowWrap ? false : (col.nowrap ?? listHubDesktop);
+
+  if (nowrap) {
+    return {
+      wordBreak: "normal",
+      overflowWrap: "normal",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      maxWidth: listHubDesktop
+        ? (col.tdStyle?.maxWidth ?? DATA_COL_MAX_PX)
+        : undefined,
+      minWidth:
+        col.minWidth ??
+        col.tdStyle?.minWidth ??
+        (listHubDesktop ? 72 : ("max-content" as const)),
+    };
+  }
+
+  return {
+    maxWidth: DATA_COL_MAX_PX,
+    wordBreak: "normal",
+    overflowWrap: "anywhere",
+    minWidth: col.minWidth ?? col.tdStyle?.minWidth,
+  };
+}
+
+function colHeaderStyle<T>(col: Col<T>, listHubDesktop: boolean): React.CSSProperties {
+  const allowWrap = col.wrap === true;
+  const nowrap = allowWrap ? false : (col.nowrap ?? listHubDesktop);
+  if (nowrap) {
+    return {
+      maxWidth: listHubDesktop ? DATA_COL_MAX_PX : undefined,
+      minWidth:
+        col.minWidth ??
+        (listHubDesktop ? 72 : ("max-content" as const)),
+    };
+  }
+  return {
+    maxWidth: DATA_COL_MAX_PX,
+    minWidth: col.minWidth,
+  };
+}
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 
@@ -192,7 +244,8 @@ export function Table<T extends object>({
 
   const expandShell = fullWidthShell || shellFullWidth;
   /** Full-width card + banded filters: stretch table; grow col before Actions. */
-  const listHubDesktopGrow = shellFullWidth && !fullWidthShell && !!actions;
+  const listHubDesktop = shellFullWidth && !fullWidthShell;
+  const listHubDesktopGrow = listHubDesktop && !!actions;
 
   useLayoutEffect(() => {
     if (expandShell) {
@@ -489,10 +542,7 @@ export function Table<T extends object>({
                       className="ui-thead-th grs-thead-th"
                       style={{
                         ...styles.th,
-                        maxWidth: col.nowrap ? undefined : DATA_COL_MAX_PX,
-                        minWidth:
-                          col.minWidth ??
-                          (col.nowrap ? ("max-content" as const) : undefined),
+                        ...colHeaderStyle(col, listHubDesktop),
                         cursor: col.sortable ? "pointer" : "default",
                         userSelect: "none",
                       }}
@@ -555,23 +605,8 @@ export function Table<T extends object>({
                         key={col.key}
                         style={{
                           ...styles.td,
-                          maxWidth: col.nowrap ? undefined : DATA_COL_MAX_PX,
-                          wordBreak: "normal",
-                          overflowWrap: col.nowrap ? "normal" : "anywhere",
+                          ...colTextCellStyle(col, listHubDesktop),
                           ...col.tdStyle,
-                          ...(col.nowrap
-                            ? {
-                                whiteSpace: "nowrap" as const,
-                                overflowWrap: "normal" as const,
-                                wordBreak: "normal" as const,
-                                minWidth:
-                                  col.minWidth ??
-                                  col.tdStyle?.minWidth ??
-                                  ("max-content" as const),
-                              }
-                            : {
-                                minWidth: col.minWidth ?? col.tdStyle?.minWidth,
-                              }),
                         }}
                       >
                         {col.render
