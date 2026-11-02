@@ -48,9 +48,22 @@
     flex-shrink: 1;
   }
 
-  /* Measured in Table.tsx to the Actions column right edge (desktop list hubs). */
-  .grs-filter-row--banded {
-    overflow: hidden;
+  /*
+   * Measured in Table.tsx to the Actions column right edge (desktop list hubs).
+   * Table uses a grow column so the band is wide enough for search + geo on one row.
+   */
+  .ui-table-shell--full-width .grs-filter-row--banded {
+    flex-wrap: nowrap;
+  }
+
+  .ui-table-shell--full-width .grs-filter-row--banded .grs-filter-controls {
+    flex-wrap: nowrap;
+    flex-shrink: 1;
+  }
+
+  .ui-table-shell--full-width .ui-table--list-hub-grow .ui-table-grow-col {
+    width: 100%;
+    padding: 0;
   }
 }
 

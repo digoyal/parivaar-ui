@@ -5,6 +5,9 @@ import { RowActions } from "./RowActions";
 /** Fits three 26px row-action buttons + gaps + cell padding (border-box). */
 const ACTIONS_COL_PX = 92;
 
+/** Desktop list hubs: min space between last data column and Actions (table is width:100%). */
+const LIST_HUB_GROW_COL_MIN_PX = 56;
+
 /** Soft cap so one long value does not stretch sparse tables; wide lists still scroll. */
 const DATA_COL_MAX_PX = 360;
 
@@ -24,6 +27,8 @@ export interface Col<T> {
   tdStyle?: React.CSSProperties;
   /** Keep cell on one line (names, status badges, codes). Long values ellipsize in the cell. */
   nowrap?: boolean;
+  /** Minimum column width (px or CSS length). Prefer with nowrap on list-hub tables so grow col absorbs shrink. */
+  minWidth?: number | string;
 }
 
 interface TableProps<T> {
@@ -186,6 +191,8 @@ export function Table<T extends object>({
   }, []);
 
   const expandShell = fullWidthShell || shellFullWidth;
+  /** Full-width card + banded filters: stretch table; grow col before Actions. */
+  const listHubDesktopGrow = shellFullWidth && !fullWidthShell && !!actions;
 
   useLayoutEffect(() => {
     if (expandShell) {
@@ -461,8 +468,18 @@ export function Table<T extends object>({
               Many columns overflow this wrapper horizontally. auto + nowrap headers keep labels intact.
             */}
             <table
-              className="ui-table"
-              style={{ width: "max-content", maxWidth: "none", borderCollapse: "collapse", tableLayout: "auto" }}
+              className={[
+                "ui-table",
+                listHubDesktopGrow ? "ui-table--list-hub-grow" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              style={{
+                width: listHubDesktopGrow ? "100%" : "max-content",
+                maxWidth: "none",
+                borderCollapse: "collapse",
+                tableLayout: "auto",
+              }}
             >
               <thead>
                 <tr>
@@ -473,6 +490,9 @@ export function Table<T extends object>({
                       style={{
                         ...styles.th,
                         maxWidth: col.nowrap ? undefined : DATA_COL_MAX_PX,
+                        minWidth:
+                          col.minWidth ??
+                          (col.nowrap ? ("max-content" as const) : undefined),
                         cursor: col.sortable ? "pointer" : "default",
                         userSelect: "none",
                       }}
@@ -482,6 +502,19 @@ export function Table<T extends object>({
                       {col.sortable && <SortIcon dir={sortKey === col.key ? sortDir : null} />}
                     </th>
                   ))}
+                  {listHubDesktopGrow && (
+                    <th
+                      className="ui-thead-th grs-thead-th ui-table-grow-col"
+                      aria-hidden
+                      style={{
+                        ...styles.th,
+                        width: "100%",
+                        minWidth: LIST_HUB_GROW_COL_MIN_PX,
+                        padding: 0,
+                        borderLeft: "none",
+                      }}
+                    />
+                  )}
                   {actions && (
                     <th
                       className="ui-thead-th grs-thead-th"
@@ -507,7 +540,7 @@ export function Table<T extends object>({
               <tbody>
                 {sorted.length === 0 ? (
                   <tr>
-                    <td colSpan={columns.length + (actions ? 1 : 0)}
+                    <td colSpan={columns.length + (listHubDesktopGrow ? 1 : 0) + (actions ? 1 : 0)}
                         style={{ ...styles.td, padding: 40, textAlign: "center", color: "var(--text-secondary)" }}>
                       {emptyMessage}
                     </td>
@@ -525,10 +558,20 @@ export function Table<T extends object>({
                           maxWidth: col.nowrap ? undefined : DATA_COL_MAX_PX,
                           wordBreak: "normal",
                           overflowWrap: col.nowrap ? "normal" : "anywhere",
-                          ...(col.nowrap
-                            ? { whiteSpace: "nowrap" as const }
-                            : {}),
                           ...col.tdStyle,
+                          ...(col.nowrap
+                            ? {
+                                whiteSpace: "nowrap" as const,
+                                overflowWrap: "normal" as const,
+                                wordBreak: "normal" as const,
+                                minWidth:
+                                  col.minWidth ??
+                                  col.tdStyle?.minWidth ??
+                                  ("max-content" as const),
+                              }
+                            : {
+                                minWidth: col.minWidth ?? col.tdStyle?.minWidth,
+                              }),
                         }}
                       >
                         {col.render
@@ -536,6 +579,19 @@ export function Table<T extends object>({
                           : String((row as Record<string, unknown>)[col.key] ?? "—")}
                       </td>
                     ))}
+                    {listHubDesktopGrow && (
+                      <td
+                        className="ui-table-grow-col"
+                        aria-hidden
+                        style={{
+                          ...styles.td,
+                          width: "100%",
+                          minWidth: LIST_HUB_GROW_COL_MIN_PX,
+                          padding: 0,
+                          borderLeft: "none",
+                        }}
+                      />
+                    )}
                     {actions && (
                       <td style={{
                         ...styles.td,
