@@ -66,6 +66,8 @@ interface TableProps<T> {
    * pagination.total when paged, else filtered/sorted row count.
    */
   totalCount?: number;
+  /** Desktop: use full available width for shell + card (list hubs). Default hugs column width. */
+  shellFullWidth?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -108,6 +110,7 @@ export function Table<T extends object>({
   actions,
   pagination,
   totalCount,
+  shellFullWidth = false,
 }: TableProps<T>) {
 
   const [query, setQuery] = useState("");
@@ -179,8 +182,10 @@ export function Table<T extends object>({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  const expandShell = fullWidthShell || shellFullWidth;
+
   useLayoutEffect(() => {
-    if (fullWidthShell) {
+    if (expandShell) {
       setShellWidth(undefined);
       return;
     }
@@ -199,7 +204,7 @@ export function Table<T extends object>({
     const table = el?.querySelector("table");
     if (table) ro.observe(table);
     return () => ro.disconnect();
-  }, [columns, data, isLoading, sorted.length, searchable, filters, fullWidthShell]);
+  }, [columns, data, isLoading, sorted.length, searchable, filters, expandShell]);
 
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -267,12 +272,19 @@ export function Table<T extends object>({
       : `${displayTotal.toLocaleString("en-IN")} ${displayTotal === 1 ? "row" : "rows"}`;
 
   const shellStyle: React.CSSProperties = {
-    width: fullWidthShell ? "100%" : (shellWidth ?? "max-content"),
+    width: expandShell ? "100%" : (shellWidth ?? "max-content"),
     maxWidth: "100%",
   };
 
+  const shellClass = [
+    "ui-table-shell",
+    shellFullWidth ? "ui-table-shell--full-width" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="ui-table-shell" style={shellStyle}>
+    <div className={shellClass} style={shellStyle}>
       {/* ── Page header: Title + row total + Export + Print + Add ── */}
       <div
         ref={headerRef}
