@@ -47,6 +47,11 @@
     min-width: 0;
     flex-shrink: 1;
   }
+
+  /* Measured in Table.tsx to the Actions column right edge (desktop list hubs). */
+  .grs-filter-row--banded {
+    overflow: hidden;
+  }
 }
 
 /* Filter slot controls (Year, Class, checkboxes) — inline on desktop */

@@ -120,8 +120,11 @@ export function Table<T extends object>({
   const [filtersOpen, setFiltersOpen] = useState(false);
   /** Sticky actions only when the table overflows horizontally (avoids a wide gap when the table is narrow). */
   const scrollWrapRef = useRef<HTMLDivElement>(null);
+  const filterRowRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [actionsSticky, setActionsSticky] = useState(false);
+  /** Desktop list hubs: filter band must not extend past the table Actions column. */
+  const [filterBandPx, setFilterBandPx] = useState<number | undefined>();
   /** Match toolbar + filter bar to table width (not full viewport / empty card chrome). */
   const [shellWidth, setShellWidth] = useState<number | undefined>();
   /** Phone/tablet: full-width card; desktop may hug sparse column sets. */
@@ -256,6 +259,51 @@ export function Table<T extends object>({
 
   const hasSearch = searchable || filters;
 
+  useLayoutEffect(() => {
+    const shouldBand =
+      shellFullWidth && !fullWidthShell && hasSearch && !!actions && !isLoading;
+    if (!shouldBand) {
+      setFilterBandPx(undefined);
+      return;
+    }
+    const measureBand = () => {
+      const filterRow = filterRowRef.current;
+      const scrollEl = scrollWrapRef.current;
+      if (!filterRow || !scrollEl) return;
+      const table = scrollEl.querySelector("table");
+      if (!table) return;
+      const ths = table.querySelectorAll("th");
+      const actionsTh = ths.length ? ths[ths.length - 1] : null;
+      const anchorRight =
+        actionsTh?.getBoundingClientRect().right ??
+        table.getBoundingClientRect().right;
+      const left = filterRow.getBoundingClientRect().left;
+      const w = Math.ceil(anchorRight - left);
+      setFilterBandPx(w > 0 ? w : undefined);
+    };
+    measureBand();
+    const ro = new ResizeObserver(measureBand);
+    if (filterRowRef.current) ro.observe(filterRowRef.current);
+    if (scrollWrapRef.current) ro.observe(scrollWrapRef.current);
+    const table = scrollWrapRef.current?.querySelector("table");
+    if (table) ro.observe(table);
+    window.addEventListener("resize", measureBand);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measureBand);
+    };
+  }, [
+    shellFullWidth,
+    fullWidthShell,
+    hasSearch,
+    actions,
+    isLoading,
+    actionsSticky,
+    columns,
+    data,
+    sorted.length,
+  ]);
+
   // Top total: prefer explicit / API pagination total; else filtered view length.
   const displayTotal =
     totalCount ??
@@ -342,10 +390,23 @@ export function Table<T extends object>({
       }}>
         {hasSearch && (
           <div
-            className="grs-filter-row"
+            ref={filterRowRef}
+            className={[
+              "grs-filter-row",
+              filterBandPx != null ? "grs-filter-row--banded" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
             style={{
               padding: "10px 12px",
               borderBottom: "1px solid var(--border)",
+              ...(filterBandPx != null
+                ? {
+                    width: filterBandPx,
+                    maxWidth: filterBandPx,
+                    boxSizing: "border-box",
+                  }
+                : {}),
             }}
           >
             {searchable && (
