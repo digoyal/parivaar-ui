@@ -1,0 +1,16 @@
+---
+description: Mandatory Mac-only development (shared UI)
+alwaysApply: true
+---
+
+# parivaar-ui — Mac-only agent environment (mandatory)
+
+Shared UI for KutirGRS. When editing this repo, the same Mac-only rules apply as **KutirGRS AGENTS.md §0** and **KutirGRS** `.cursor/rules/00-kutirgrs-mac-only.mdc`.
+
+1. All **code changes and verification** for parivaar-ui (and KutirGRS when linked) happen on **Dinesh's Mac** via the **self-hosted Mac worker** — not a Cursor cloud VM `/workspace` clone.
+2. **Do not** `git push`, open PRs, or create feature branches unless Dinesh explicitly asks in chat.
+3. Until push: **at most one** unpushed commit on local `main`; further work → `git commit --amend`.
+4. KutirGRS local dev: **http://localhost:5173** and KutirGRS `scripts/dev-ui.sh`; restart the API when backend changes.
+5. Cloud agents may **read** GitHub for context only — they must **not** edit parivaar-ui or KutirGRS in the cloud.
+
+Checkout: `/Users/dineshgoyal/projects/parivaar-ui` (KutirGRS: `/Users/dineshgoyal/projects/KutirGRS`).
