@@ -46,6 +46,19 @@ const undoControlCellClipStyle: CSSProperties = {
   minWidth: `max(${LOOKUP_INLINE_EDIT_CELL_MIN_WIDTH}, 48ch)`,
 };
 
+/** When a column sets `minWidth`, use it as-is for the edit `<td>` (short codes, room #, …). */
+function editCellTdStyle(colMinWidth: LookupInlineColumnDef<unknown>["minWidth"]): CSSProperties {
+  const colMin =
+    colMinWidth == null ? null : typeof colMinWidth === "number" ? `${colMinWidth}px` : String(colMinWidth);
+  return {
+    overflow: "visible",
+    textOverflow: "clip",
+    whiteSpace: "normal",
+    maxWidth: "none",
+    ...(colMin ? { minWidth: colMin } : undoControlCellClipStyle),
+  };
+}
+
 export interface LookupInlineTableProps<T extends object> {
   title: string;
   subtitle?: string;
@@ -105,19 +118,7 @@ export function LookupInlineTable<T extends object>({
     tdStyle: (row) => {
       const isEditing = editingId != null && rowKey(row) === editingId;
       if (isEditing && c.editCell) {
-        /** Do not replace `undoControlCellClipStyle.minWidth` with bare `c.minWidth` — that would drop the `max(..., 48ch)` floor. */
-        const colMin =
-          typeof c.minWidth === "undefined"
-            ? null
-            : typeof c.minWidth === "number"
-              ? `${c.minWidth}px`
-              : String(c.minWidth);
-        return {
-          ...undoControlCellClipStyle,
-          ...(colMin
-            ? { minWidth: `max(${colMin}, 48ch)` }
-            : {}),
-        };
+        return editCellTdStyle(c.minWidth);
       }
       return undefined;
     },
