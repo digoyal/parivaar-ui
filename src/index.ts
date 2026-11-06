@@ -1,4 +1,11 @@
 export { Table, GrsTable, RowCountBadge, type Col } from "./Table";
+export {
+  LookupInlineTable,
+  LOOKUP_INLINE_EDIT_CELL_MIN_WIDTH,
+  type LookupInlineColumnDef,
+  type LookupInlineEditControls,
+  type LookupInlineTableProps,
+} from "./LookupInlineTable";
 export { RowActions } from "./RowActions";
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog";
 export { GrsModal, type GrsModalProps } from "./GrsModal";

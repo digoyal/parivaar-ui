@@ -97,12 +97,18 @@ function tdStyleOverrides<T>(tdStyle: Col<T>["tdStyle"]): React.CSSProperties | 
   return typeof tdStyle === "function" ? undefined : tdStyle;
 }
 
-/** List-hub desktop: default nowrap + ellipsis; sparse/mobile tables keep wrap-anywhere unless col opts in. */
+/**
+ * Base `<td>` chrome for a cell. `resolvedTdExtras` is the **per-cell** `tdStyle` merge input:
+ * static `col.tdStyle` **or** `col.tdStyle(row, idx)` when it is a function — must match what we
+ * later spread on the `<td>` so list-hub `maxWidth: DATA_COL_MAX_PX` can be skipped when a row
+ * clears it (e.g. `LookupInlineTable` inline edit).
+ */
 function colTextCellStyle<T>(
   col: Col<T>,
   listHubDesktop: boolean,
+  resolvedTdExtras: React.CSSProperties | undefined,
 ): React.CSSProperties {
-  const tdExtras = tdStyleOverrides(col.tdStyle);
+  const tdExtras = resolvedTdExtras ?? tdStyleOverrides(col.tdStyle);
   const allowWrap = col.wrap === true;
   const nowrap = allowWrap ? false : (col.nowrap ?? listHubDesktop);
 
@@ -124,7 +130,7 @@ function colTextCellStyle<T>(
   }
 
   return {
-    maxWidth: DATA_COL_MAX_PX,
+    maxWidth: tdExtras?.maxWidth ?? DATA_COL_MAX_PX,
     wordBreak: "normal",
     overflowWrap: "anywhere",
     minWidth: col.minWidth ?? tdExtras?.minWidth,
@@ -135,9 +141,16 @@ function colHeaderStyle<T>(col: Col<T>, listHubDesktop: boolean): React.CSSPrope
   const tdExtras = tdStyleOverrides(col.tdStyle);
   const allowWrap = col.wrap === true;
   const nowrap = allowWrap ? false : (col.nowrap ?? listHubDesktop);
+  /**
+   * `tdStyleOverrides` only reads static `Col.tdStyle`. Per-row `tdStyle` is used in `<td>`
+   * only; if we still cap `<th>` with `DATA_COL_MAX_PX`, list-hub columns stay ~360px wide
+   * while body cells clear `maxWidth` (e.g. inline edit) — the column never grows and
+   * controls look clipped.
+   */
+  const skipHeaderMaxCap = typeof col.tdStyle === "function";
   if (nowrap) {
     return {
-      maxWidth: listHubDesktop ? DATA_COL_MAX_PX : undefined,
+      ...(skipHeaderMaxCap || !listHubDesktop ? {} : { maxWidth: DATA_COL_MAX_PX }),
       minWidth:
         col.minWidth ??
         tdExtras?.minWidth ??
@@ -145,7 +158,7 @@ function colHeaderStyle<T>(col: Col<T>, listHubDesktop: boolean): React.CSSPrope
     };
   }
   return {
-    maxWidth: DATA_COL_MAX_PX,
+    ...(skipHeaderMaxCap ? {} : { maxWidth: DATA_COL_MAX_PX }),
     minWidth: col.minWidth ?? tdExtras?.minWidth,
   };
 }
@@ -613,22 +626,26 @@ export function Table<T extends object>({
                     key={rowKey(row)}
                     style={{ background: idx % 2 === 0 ? "var(--bg-card)" : "var(--bg-input)" }}
                   >
-                    {columns.map(col => (
-                      <td
-                        key={col.key}
-                        style={{
-                          ...styles.td,
-                          ...colTextCellStyle(col, listHubDesktop),
-                          ...(typeof col.tdStyle === "function"
-                            ? col.tdStyle(row, idx) ?? {}
-                            : col.tdStyle ?? {}),
-                        }}
-                      >
-                        {col.render
-                          ? col.render(row, idx)
-                          : String((row as Record<string, unknown>)[col.key] ?? "—")}
-                      </td>
-                    ))}
+                    {columns.map((col) => {
+                      const rowTdStyle =
+                        typeof col.tdStyle === "function"
+                          ? col.tdStyle(row, idx) ?? {}
+                          : col.tdStyle ?? {};
+                      return (
+                        <td
+                          key={col.key}
+                          style={{
+                            ...styles.td,
+                            ...colTextCellStyle(col, listHubDesktop, rowTdStyle),
+                            ...rowTdStyle,
+                          }}
+                        >
+                          {col.render
+                            ? col.render(row, idx)
+                            : String((row as Record<string, unknown>)[col.key] ?? "—")}
+                        </td>
+                      );
+                    })}
                     {listHubDesktopGrow && (
                       <td
                         className="ui-table-grow-col"

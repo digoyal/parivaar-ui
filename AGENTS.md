@@ -7,6 +7,7 @@ Shared UI primitives for Parivaar apps. **Source-only** — no `dist` build; eac
 | Export | Notes |
 |--------|--------|
 | `Table`, `Col` | Generic data table (search, sort, CSV, print, pagination, row actions) |
+| `LookupInlineTable`, `LookupInlineColumnDef`, `LOOKUP_INLINE_EDIT_CELL_MIN_WIDTH` | Same table + optional per-column `editCell`; auto fixing ellipsis on active inline-edit cells |
 | `GrsTable` | Deprecated alias of `Table` (compat) |
 | `RowActions` | View / edit / delete icon buttons for table rows |
 | `ConfirmDialog` | In-app confirm overlay (replaces browser `confirm()`) |
