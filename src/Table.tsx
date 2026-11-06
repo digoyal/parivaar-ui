@@ -65,7 +65,13 @@ interface TableProps<T> {
   onAdd?: () => void;
   addLabel?: string;
   /** Row-level view/edit/delete callbacks. When provided, a sticky actions column is added. */
-  actions?: (row: T, idx: number) => { onView?: () => void; onEdit?: () => void; onDelete?: () => void; };
+  actions?: (row: T, idx: number) => {
+    onView?: () => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
+    onSave?: () => void;
+    onCancel?: () => void;
+  };
   /** Server-side pagination. When provided, replaces row-count footer with page controls. */
   pagination?: { page: number; pageSize: number; total: number; onPageChange: (p: number) => void };
   /**

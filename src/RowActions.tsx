@@ -1,9 +1,13 @@
+import type { CSSProperties } from "react";
 import { styles } from "./styles";
 
 interface RowActionsProps {
   onView?:   () => void;
   onEdit?:   () => void;
   onDelete?: () => void;
+  /** Inline edit: text buttons shown in the Actions column (narrow — stacked). */
+  onSave?:   () => void;
+  onCancel?: () => void;
 }
 
 const IconEye = () => (
@@ -29,10 +33,50 @@ const IconTrash = () => (
   </svg>
 );
 
+const inlineEditBtnPrimary: CSSProperties = {
+  ...styles.btnPrimary,
+  padding: "5px 8px",
+  fontSize: 12,
+  fontWeight: 600,
+  width: "100%",
+  boxSizing: "border-box",
+  whiteSpace: "nowrap",
+};
+
+const inlineEditBtnGhost: CSSProperties = {
+  ...styles.btnSecondary,
+  padding: "5px 8px",
+  fontSize: 12,
+  fontWeight: 600,
+  width: "100%",
+  boxSizing: "border-box",
+  whiteSpace: "nowrap",
+};
+
 /** Compact View / Edit / Delete for table rows (sticky actions column). */
-export function RowActions({ onView, onEdit, onDelete }: RowActionsProps) {
+export function RowActions({ onView, onEdit, onDelete, onSave, onCancel }: RowActionsProps) {
+  const inlineEdit = onSave != null || onCancel != null;
   return (
-    <div style={{ display: "flex", gap: 2, justifyContent: "flex-end", flexWrap: "nowrap" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: inlineEdit ? 4 : 2,
+        justifyContent: "flex-end",
+        flexWrap: "nowrap",
+        alignItems: "stretch",
+        flexDirection: inlineEdit ? "column" : "row",
+      }}
+    >
+      {onSave && (
+        <button type="button" onClick={onSave} style={inlineEditBtnPrimary}>
+          Save
+        </button>
+      )}
+      {onCancel && (
+        <button type="button" onClick={onCancel} style={inlineEditBtnGhost}>
+          Cancel
+        </button>
+      )}
       {onView && (
         <button type="button" onClick={onView} title="View" style={styles.btnRowAction}>
           <IconEye />
