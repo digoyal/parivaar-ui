@@ -29,33 +29,32 @@ export interface LookupInlineColumnDef<T> {
   editCell?: (row: T, controls: LookupInlineEditControls) => ReactNode;
 }
 
-/** Minimum width for editable lookup name cells (matches BNV `LOOKUP_INLINE_EDIT_NAME_MIN_WIDTH`). */
+/**
+ * Apps often set this on name columns (e.g. BNV `LOOKUP_INLINE_EDIT_NAME_MIN_WIDTH`).
+ * Edit `<td>` styles do **not** apply a floor — they inherit the same `minWidth` as read mode
+ * from {@link Table}'s `colTextCellStyle` merge unless the column sets `minWidth` explicitly.
+ */
 export const LOOKUP_INLINE_EDIT_CELL_MIN_WIDTH = "12rem";
 
 /**
- * Undo `colTextCellStyle` ellipsis clipping for cells hosting inputs while editing.
- * List-hub tables keep sibling rows at `DATA_COL_MAX_PX`, so the column can stay ~360px wide;
- * a plain `width: 100%` input then fills that box and looks "clipped". A floor in `ch` forces
- * the column (and horizontal scroll) wide enough for long names.
+ * Undo `colTextCellStyle` ellipsis clipping so inputs are usable while editing.
+ * Do **not** add a larger `minWidth` than read mode (e.g. no `48ch` floor); that caused
+ * columns to jump wider on edit. Width stays from `Col.minWidth` + Table defaults.
  */
-const undoControlCellClipStyle: CSSProperties = {
+const editCellUnclipStyle: CSSProperties = {
   overflow: "visible",
   textOverflow: "clip",
   whiteSpace: "normal",
   maxWidth: "none",
-  minWidth: `max(${LOOKUP_INLINE_EDIT_CELL_MIN_WIDTH}, 48ch)`,
 };
 
-/** When a column sets `minWidth`, use it as-is for the edit `<td>` (short codes, room #, …). */
 function editCellTdStyle(colMinWidth: LookupInlineColumnDef<unknown>["minWidth"]): CSSProperties {
   const colMin =
     colMinWidth == null ? null : typeof colMinWidth === "number" ? `${colMinWidth}px` : String(colMinWidth);
   return {
-    overflow: "visible",
-    textOverflow: "clip",
-    whiteSpace: "normal",
-    maxWidth: "none",
-    ...(colMin ? { minWidth: colMin } : undoControlCellClipStyle),
+    ...editCellUnclipStyle,
+    // Explicit column minWidth only (codes, names); otherwise omit so merge matches read `<td>`.
+    ...(colMin ? { minWidth: colMin } : {}),
   };
 }
 
