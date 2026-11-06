@@ -23,8 +23,8 @@ export interface Col<T> {
   csvValue?: (row: T) => string;
   /** Sort value for computed columns (e.g. labels looked up from a map). Falls back to row[key]. */
   sortValue?: (row: T) => string | number;
-  /** Extra td style overrides. */
-  tdStyle?: React.CSSProperties;
+  /** Extra td style overrides (per-column or per-row). */
+  tdStyle?: React.CSSProperties | ((row: T, index: number) => React.CSSProperties | undefined);
   /** Keep cell on one line (names, status badges, codes). Long values ellipsize in the cell. */
   nowrap?: boolean;
   /** Allow mid-cell wrapping (e.g. long notes). List hubs default to single-line + ellipsis unless wrap is set. */
@@ -93,11 +93,16 @@ const SortIcon = ({ dir }: { dir: "asc" | "desc" | null }) => (
 
 function csvEscape(v: string) { return `"${v.replace(/"/g, '""')}"`; }
 
+function tdStyleOverrides<T>(tdStyle: Col<T>["tdStyle"]): React.CSSProperties | undefined {
+  return typeof tdStyle === "function" ? undefined : tdStyle;
+}
+
 /** List-hub desktop: default nowrap + ellipsis; sparse/mobile tables keep wrap-anywhere unless col opts in. */
 function colTextCellStyle<T>(
   col: Col<T>,
   listHubDesktop: boolean,
 ): React.CSSProperties {
+  const tdExtras = tdStyleOverrides(col.tdStyle);
   const allowWrap = col.wrap === true;
   const nowrap = allowWrap ? false : (col.nowrap ?? listHubDesktop);
 
@@ -109,11 +114,11 @@ function colTextCellStyle<T>(
       overflow: "hidden",
       textOverflow: "ellipsis",
       maxWidth: listHubDesktop
-        ? (col.tdStyle?.maxWidth ?? DATA_COL_MAX_PX)
+        ? (tdExtras?.maxWidth ?? DATA_COL_MAX_PX)
         : undefined,
       minWidth:
         col.minWidth ??
-        col.tdStyle?.minWidth ??
+        tdExtras?.minWidth ??
         (listHubDesktop ? 72 : ("max-content" as const)),
     };
   }
@@ -122,11 +127,12 @@ function colTextCellStyle<T>(
     maxWidth: DATA_COL_MAX_PX,
     wordBreak: "normal",
     overflowWrap: "anywhere",
-    minWidth: col.minWidth ?? col.tdStyle?.minWidth,
+    minWidth: col.minWidth ?? tdExtras?.minWidth,
   };
 }
 
 function colHeaderStyle<T>(col: Col<T>, listHubDesktop: boolean): React.CSSProperties {
+  const tdExtras = tdStyleOverrides(col.tdStyle);
   const allowWrap = col.wrap === true;
   const nowrap = allowWrap ? false : (col.nowrap ?? listHubDesktop);
   if (nowrap) {
@@ -134,12 +140,13 @@ function colHeaderStyle<T>(col: Col<T>, listHubDesktop: boolean): React.CSSPrope
       maxWidth: listHubDesktop ? DATA_COL_MAX_PX : undefined,
       minWidth:
         col.minWidth ??
+        tdExtras?.minWidth ??
         (listHubDesktop ? 72 : ("max-content" as const)),
     };
   }
   return {
     maxWidth: DATA_COL_MAX_PX,
-    minWidth: col.minWidth,
+    minWidth: col.minWidth ?? tdExtras?.minWidth,
   };
 }
 
@@ -612,7 +619,9 @@ export function Table<T extends object>({
                         style={{
                           ...styles.td,
                           ...colTextCellStyle(col, listHubDesktop),
-                          ...col.tdStyle,
+                          ...(typeof col.tdStyle === "function"
+                            ? col.tdStyle(row, idx) ?? {}
+                            : col.tdStyle ?? {}),
                         }}
                       >
                         {col.render
