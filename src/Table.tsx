@@ -2,8 +2,8 @@ import { useState, useMemo, useRef, useLayoutEffect } from "react";
 import { styles } from "./styles";
 import { RowActions } from "./RowActions";
 
-/** Fits three 26px row-action buttons + gaps + cell padding (border-box). */
-const ACTIONS_COL_PX = 92;
+/** Fits row-action controls: three 26px icon buttons, or two compact inline Save/Cancel + gap + cell padding (border-box). */
+const ACTIONS_COL_PX = 118;
 
 /** Desktop list hubs: min space between last data column and Actions (table is width:100%). */
 const LIST_HUB_GROW_COL_MIN_PX = 56;

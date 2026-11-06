@@ -5,7 +5,7 @@ interface RowActionsProps {
   onView?:   () => void;
   onEdit?:   () => void;
   onDelete?: () => void;
-  /** Inline edit: text buttons shown in the Actions column (narrow — stacked). */
+  /** Inline edit: compact text buttons in the Actions row (match icon button footprint). */
   onSave?:   () => void;
   onCancel?: () => void;
 }
@@ -33,24 +33,37 @@ const IconTrash = () => (
   </svg>
 );
 
-const inlineEditBtnPrimary: CSSProperties = {
-  ...styles.btnPrimary,
-  padding: "5px 8px",
+/** Icon row actions are 26px tall; inline Save/Cancel use ~34px min touch height without full-width stacking. */
+const INLINE_EDIT_MIN_TOUCH_PX = 34;
+
+const inlineEditBtnBase: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxSizing: "border-box",
+  minHeight: INLINE_EDIT_MIN_TOUCH_PX,
+  minWidth: INLINE_EDIT_MIN_TOUCH_PX,
+  padding: "0 8px",
+  borderRadius: 5,
   fontSize: 12,
   fontWeight: 600,
-  width: "100%",
-  boxSizing: "border-box",
   whiteSpace: "nowrap",
+  cursor: "pointer",
+  flexShrink: 0,
+};
+
+const inlineEditBtnPrimary: CSSProperties = {
+  ...inlineEditBtnBase,
+  background: "var(--link-color)",
+  color: "white",
+  border: "none",
 };
 
 const inlineEditBtnGhost: CSSProperties = {
-  ...styles.btnSecondary,
-  padding: "5px 8px",
-  fontSize: 12,
-  fontWeight: 600,
-  width: "100%",
-  boxSizing: "border-box",
-  whiteSpace: "nowrap",
+  ...inlineEditBtnBase,
+  background: "var(--bg-input)",
+  color: "var(--text-secondary)",
+  border: "1px solid var(--border)",
 };
 
 /** Compact View / Edit / Delete for table rows (sticky actions column). */
@@ -63,17 +76,17 @@ export function RowActions({ onView, onEdit, onDelete, onSave, onCancel }: RowAc
         gap: inlineEdit ? 4 : 2,
         justifyContent: "flex-end",
         flexWrap: "nowrap",
-        alignItems: "stretch",
-        flexDirection: inlineEdit ? "column" : "row",
+        alignItems: "center",
+        flexDirection: "row",
       }}
     >
       {onSave && (
-        <button type="button" onClick={onSave} style={inlineEditBtnPrimary}>
+        <button type="button" onClick={onSave} title="Save" style={inlineEditBtnPrimary}>
           Save
         </button>
       )}
       {onCancel && (
-        <button type="button" onClick={onCancel} style={inlineEditBtnGhost}>
+        <button type="button" onClick={onCancel} title="Cancel" style={inlineEditBtnGhost}>
           Cancel
         </button>
       )}
