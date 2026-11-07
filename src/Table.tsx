@@ -410,6 +410,10 @@ export function Table<T extends object>({
     maxWidth: "100%",
   };
 
+  /** When row actions exist, export/print sit in the Actions column header (same footprint as row icons). */
+  const exportPrintInActionsCol =
+    !!actions && (!!exportFilename || printTitle !== undefined);
+
   const shellClass = [
     "ui-table-shell",
     shellFullWidth ? "ui-table-shell--full-width" : "",
@@ -449,12 +453,12 @@ export function Table<T extends object>({
           {subtitle && <p style={{ margin: "4px 0 0", ...styles.muted }}>{subtitle}</p>}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
-          {exportFilename && (
+          {!exportPrintInActionsCol && exportFilename && (
             <button onClick={exportCsv} style={styles.btnIcon} title="Export CSV">
               <IconDownload />
             </button>
           )}
-          {printTitle !== undefined && (
+          {!exportPrintInActionsCol && printTitle !== undefined && (
             <button onClick={doPrint} style={styles.btnIcon} title="Print">
               <IconPrint />
             </button>
@@ -594,6 +598,7 @@ export function Table<T extends object>({
                   {actions && (
                     <th
                       className="ui-thead-th grs-thead-th"
+                      aria-label={exportPrintInActionsCol ? "Actions and export" : "Actions"}
                       style={{
                         ...styles.th,
                         width: ACTIONS_COL_PX,
@@ -601,6 +606,7 @@ export function Table<T extends object>({
                         maxWidth: ACTIONS_COL_PX,
                         padding: "8px 6px",
                         textAlign: "right",
+                        verticalAlign: "middle",
                         ...(actionsSticky ? {
                           position: "sticky",
                           right: 0,
@@ -608,7 +614,40 @@ export function Table<T extends object>({
                         } : {}),
                       }}
                     >
-                      Actions
+                      {exportPrintInActionsCol ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            alignItems: "center",
+                            gap: 2,
+                            flexWrap: "nowrap",
+                          }}
+                        >
+                          {exportFilename && (
+                            <button
+                              type="button"
+                              onClick={exportCsv}
+                              style={styles.btnRowAction}
+                              title="Export CSV"
+                            >
+                              <IconDownload />
+                            </button>
+                          )}
+                          {printTitle !== undefined && (
+                            <button
+                              type="button"
+                              onClick={doPrint}
+                              style={styles.btnRowAction}
+                              title="Print"
+                            >
+                              <IconPrint />
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        "Actions"
+                      )}
                     </th>
                   )}
                 </tr>
