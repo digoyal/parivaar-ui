@@ -136,6 +136,7 @@ export function LookupInlineTable<T extends object>({
       exportFilename={exportFilename}
       printTitle={printTitle}
       actions={actions}
+      showPageHeader={false}
     />
   );
 }

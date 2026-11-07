@@ -36,6 +36,8 @@ export interface Col<T> {
 interface TableProps<T> {
   title: string;
   subtitle?: string;
+  /** Title + row-count row above the card (lookup lists often set false). Default true. */
+  showPageHeader?: boolean;
   columns: Col<T>[];
   data: T[];
   rowKey: (row: T) => string | number;
@@ -184,7 +186,7 @@ const IconPrint = () => (
 // ── Component ──────────────────────────────────────────────────────────────
 
 export function Table<T extends object>({
-  title, subtitle,
+  title, subtitle, showPageHeader = true,
   columns, data, rowKey,
   isLoading, emptyMessage = "No records found.",
   searchable, searchPlaceholder = "Search…", searchFn, externalSearch, onExternalSearch,
@@ -454,17 +456,27 @@ export function Table<T extends object>({
     .filter(Boolean)
     .join(" ");
 
+  const showTitleToolbar =
+    showPageHeader
+    || !!onAdd
+    || !!headerExtra
+    || (!exportPrintInActionsCol && (!!exportFilename || printTitle !== undefined));
+
   return (
     <div className={shellClass} style={shellStyle}>
       {/* ── Page header: Title + row total + Export + Print + Add ── */}
+      {showTitleToolbar && (
       <div
         ref={headerRef}
         style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, gap: 8 }}
       >
+        {(showPageHeader || subtitle) ? (
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+            {showPageHeader && (
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "var(--text-primary)" }}>{title}</h1>
-            {totalLabel && (
+            )}
+            {showPageHeader && totalLabel && (
               <span
                 style={{
                   fontSize: "0.8125rem",
@@ -483,8 +495,11 @@ export function Table<T extends object>({
               </span>
             )}
           </div>
-          {subtitle && <p style={{ margin: "4px 0 0", ...styles.muted }}>{subtitle}</p>}
+          {showPageHeader && subtitle && <p style={{ margin: "4px 0 0", ...styles.muted }}>{subtitle}</p>}
         </div>
+        ) : (
+          <div style={{ minWidth: 0, flex: 1 }} />
+        )}
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
           {!exportPrintInActionsCol && exportFilename && (
             <button onClick={exportCsv} style={styles.btnIcon} title="Export CSV">
@@ -502,6 +517,7 @@ export function Table<T extends object>({
           )}
         </div>
       </div>
+      )}
 
       {/* ── Table card (search/filters sit inside so width matches the grid) ── */}
       <div style={{
