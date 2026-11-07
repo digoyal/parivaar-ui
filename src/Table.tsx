@@ -546,6 +546,59 @@ export function Table<T extends object>({
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
           <div ref={scrollWrapRef} style={{ overflowX: "auto" }}>
+            {exportPrintInActionsCol && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  width: listHubDesktopGrow ? "100%" : "max-content",
+                  minWidth: listHubDesktopGrow ? undefined : "100%",
+                  boxSizing: "border-box",
+                  padding: "6px 0 4px",
+                  borderBottom: "1px solid var(--border)",
+                  background: "var(--bg-card)",
+                }}
+              >
+                <div
+                  style={{
+                    width: ACTIONS_COL_PX,
+                    minWidth: ACTIONS_COL_PX,
+                    maxWidth: ACTIONS_COL_PX,
+                    padding: "0 6px",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    gap: 2,
+                    flexShrink: 0,
+                    ...(actionsSticky
+                      ? { position: "sticky", right: 0, zIndex: 2, background: "var(--bg-card)" }
+                      : {}),
+                  }}
+                >
+                  {exportFilename && (
+                    <button
+                      type="button"
+                      onClick={exportCsv}
+                      style={styles.btnRowAction}
+                      title="Export CSV"
+                    >
+                      <IconDownload />
+                    </button>
+                  )}
+                  {printTitle !== undefined && (
+                    <button
+                      type="button"
+                      onClick={doPrint}
+                      style={styles.btnRowAction}
+                      title="Print"
+                    >
+                      <IconPrint />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
             {/*
               max-content width: few-column lists hug labels (no full-card column stretch).
               Many columns overflow this wrapper horizontally. auto + nowrap headers keep labels intact.
