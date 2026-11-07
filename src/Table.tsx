@@ -83,6 +83,8 @@ interface TableProps<T> {
   totalCount?: number;
   /** Desktop: use full available width for shell + card (list hubs). Default hugs column width. */
   shellFullWidth?: boolean;
+  /** Short lookup lists: card hugs table; export/print directly above thead (not a full-width filter band). */
+  compactTableShell?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -196,6 +198,7 @@ export function Table<T extends object>({
   pagination,
   totalCount,
   shellFullWidth = false,
+  compactTableShell = false,
 }: TableProps<T>) {
 
   const [query, setQuery] = useState("");
@@ -270,9 +273,10 @@ export function Table<T extends object>({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const expandShell = fullWidthShell || shellFullWidth;
+  const effectiveShellFullWidth = compactTableShell ? false : shellFullWidth;
+  const expandShell = fullWidthShell || effectiveShellFullWidth;
   /** Full-width card + banded filters: stretch table; grow col before Actions. */
-  const listHubDesktop = shellFullWidth && !fullWidthShell;
+  const listHubDesktop = effectiveShellFullWidth && !fullWidthShell;
   const listHubDesktopGrow = listHubDesktop && !!actions;
 
   useLayoutEffect(() => {
@@ -349,11 +353,12 @@ export function Table<T extends object>({
   /** Export/print above thead, right-aligned in the Actions column (not in the page title). */
   const exportPrintInActionsCol =
     !!actions && (!!exportFilename || printTitle !== undefined);
-  const showFilterRow = hasSearch || exportPrintInActionsCol;
+  const exportAboveTable = exportPrintInActionsCol && !hasSearch;
+  const showFilterRow = hasSearch;
 
   useLayoutEffect(() => {
     const shouldBand =
-      shellFullWidth
+      effectiveShellFullWidth
       && !fullWidthShell
       && showFilterRow
       && !!actions
@@ -389,7 +394,7 @@ export function Table<T extends object>({
       window.removeEventListener("resize", measureBand);
     };
   }, [
-    shellFullWidth,
+    effectiveShellFullWidth,
     fullWidthShell,
     showFilterRow,
     actions,
@@ -451,7 +456,8 @@ export function Table<T extends object>({
 
   const shellClass = [
     "ui-table-shell",
-    shellFullWidth ? "ui-table-shell--full-width" : "",
+    effectiveShellFullWidth ? "ui-table-shell--full-width" : "",
+    compactTableShell ? "ui-table-shell--compact" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -539,7 +545,6 @@ export function Table<T extends object>({
             style={{
               padding: "10px 12px",
               borderBottom: "1px solid var(--border)",
-              ...(exportPrintInActionsCol && !hasSearch ? { justifyContent: "flex-end" } : {}),
               ...(filterBandPx != null
                 ? {
                     width: filterBandPx,
@@ -597,6 +602,25 @@ export function Table<T extends object>({
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
           <div ref={scrollWrapRef} style={{ overflowX: "auto" }}>
+            <div
+              style={{
+                width: listHubDesktopGrow ? "100%" : "max-content",
+                maxWidth: "100%",
+              }}
+            >
+            {exportAboveTable && (
+              <div
+                className="grs-lookup-export-bar"
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  padding: "6px 6px 2px",
+                  boxSizing: "border-box",
+                }}
+              >
+                {actionsExportPrintSlot}
+              </div>
+            )}
             {/*
               max-content width: few-column lists hug labels (no full-card column stretch).
               Many columns overflow this wrapper horizontally. auto + nowrap headers keep labels intact.
@@ -738,6 +762,7 @@ export function Table<T extends object>({
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

@@ -69,6 +69,8 @@ export interface LookupInlineTableProps<T extends object> {
   isLoading?: boolean;
   emptyMessage?: string;
   shellFullWidth?: boolean;
+  /** Kutir-style compact card (default on for lookup inline lists). */
+  compactTableShell?: boolean;
   exportFilename?: string;
   printTitle?: string;
   actions?: (row: T, idx: number) => {
@@ -94,6 +96,7 @@ export function LookupInlineTable<T extends object>({
   isLoading,
   emptyMessage,
   shellFullWidth,
+  compactTableShell = true,
   exportFilename,
   printTitle,
   actions,
@@ -132,7 +135,8 @@ export function LookupInlineTable<T extends object>({
       rowKey={rowKey}
       isLoading={isLoading}
       emptyMessage={emptyMessage}
-      shellFullWidth={shellFullWidth}
+      shellFullWidth={compactTableShell ? false : shellFullWidth}
+      compactTableShell={compactTableShell}
       exportFilename={exportFilename}
       printTitle={printTitle}
       actions={actions}
