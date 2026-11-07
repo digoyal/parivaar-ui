@@ -344,10 +344,18 @@ export function Table<T extends object>({
   }
 
   const hasSearch = searchable || filters;
+  /** Export/print above thead, right-aligned in the Actions column (not in the page title). */
+  const exportPrintInActionsCol =
+    !!actions && (!!exportFilename || printTitle !== undefined);
+  const showFilterRow = hasSearch || exportPrintInActionsCol;
 
   useLayoutEffect(() => {
     const shouldBand =
-      shellFullWidth && !fullWidthShell && hasSearch && !!actions && !isLoading;
+      shellFullWidth
+      && !fullWidthShell
+      && showFilterRow
+      && !!actions
+      && !isLoading;
     if (!shouldBand) {
       setFilterBandPx(undefined);
       return;
@@ -381,7 +389,7 @@ export function Table<T extends object>({
   }, [
     shellFullWidth,
     fullWidthShell,
-    hasSearch,
+    showFilterRow,
     actions,
     isLoading,
     actionsSticky,
@@ -410,9 +418,34 @@ export function Table<T extends object>({
     maxWidth: "100%",
   };
 
-  /** When row actions exist, export/print sit in the Actions column header (same footprint as row icons). */
-  const exportPrintInActionsCol =
-    !!actions && (!!exportFilename || printTitle !== undefined);
+  const actionsExportPrintSlot = exportPrintInActionsCol ? (
+    <div
+      style={{
+        marginLeft: hasSearch || filters ? "auto" : undefined,
+        width: ACTIONS_COL_PX,
+        minWidth: ACTIONS_COL_PX,
+        maxWidth: ACTIONS_COL_PX,
+        padding: "0 6px",
+        boxSizing: "border-box",
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        gap: 2,
+        flexShrink: 0,
+      }}
+    >
+      {exportFilename && (
+        <button type="button" onClick={exportCsv} style={styles.btnRowAction} title="Export CSV">
+          <IconDownload />
+        </button>
+      )}
+      {printTitle !== undefined && (
+        <button type="button" onClick={doPrint} style={styles.btnRowAction} title="Print">
+          <IconPrint />
+        </button>
+      )}
+    </div>
+  ) : null;
 
   const shellClass = [
     "ui-table-shell",
@@ -478,7 +511,7 @@ export function Table<T extends object>({
         overflow: "hidden",
         ...shellStyle,
       }}>
-        {hasSearch && (
+        {showFilterRow && (
           <div
             ref={filterRowRef}
             className={[
@@ -490,6 +523,7 @@ export function Table<T extends object>({
             style={{
               padding: "10px 12px",
               borderBottom: "1px solid var(--border)",
+              ...(exportPrintInActionsCol && !hasSearch ? { justifyContent: "flex-end" } : {}),
               ...(filterBandPx != null
                 ? {
                     width: filterBandPx,
@@ -540,65 +574,13 @@ export function Table<T extends object>({
                 {filters}
               </div>
             ) : null}
+            {actionsExportPrintSlot}
           </div>
         )}
         {isLoading ? (
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
           <div ref={scrollWrapRef} style={{ overflowX: "auto" }}>
-            {exportPrintInActionsCol && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  width: listHubDesktopGrow ? "100%" : "max-content",
-                  minWidth: listHubDesktopGrow ? undefined : "100%",
-                  boxSizing: "border-box",
-                  padding: "6px 0 4px",
-                  borderBottom: "1px solid var(--border)",
-                  background: "var(--bg-card)",
-                }}
-              >
-                <div
-                  style={{
-                    width: ACTIONS_COL_PX,
-                    minWidth: ACTIONS_COL_PX,
-                    maxWidth: ACTIONS_COL_PX,
-                    padding: "0 6px",
-                    boxSizing: "border-box",
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    gap: 2,
-                    flexShrink: 0,
-                    ...(actionsSticky
-                      ? { position: "sticky", right: 0, zIndex: 2, background: "var(--bg-card)" }
-                      : {}),
-                  }}
-                >
-                  {exportFilename && (
-                    <button
-                      type="button"
-                      onClick={exportCsv}
-                      style={styles.btnRowAction}
-                      title="Export CSV"
-                    >
-                      <IconDownload />
-                    </button>
-                  )}
-                  {printTitle !== undefined && (
-                    <button
-                      type="button"
-                      onClick={doPrint}
-                      style={styles.btnRowAction}
-                      title="Print"
-                    >
-                      <IconPrint />
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
             {/*
               max-content width: few-column lists hug labels (no full-card column stretch).
               Many columns overflow this wrapper horizontally. auto + nowrap headers keep labels intact.
@@ -651,7 +633,6 @@ export function Table<T extends object>({
                   {actions && (
                     <th
                       className="ui-thead-th grs-thead-th"
-                      aria-label={exportPrintInActionsCol ? "Actions and export" : "Actions"}
                       style={{
                         ...styles.th,
                         width: ACTIONS_COL_PX,
@@ -659,7 +640,6 @@ export function Table<T extends object>({
                         maxWidth: ACTIONS_COL_PX,
                         padding: "8px 6px",
                         textAlign: "right",
-                        verticalAlign: "middle",
                         ...(actionsSticky ? {
                           position: "sticky",
                           right: 0,
@@ -667,40 +647,7 @@ export function Table<T extends object>({
                         } : {}),
                       }}
                     >
-                      {exportPrintInActionsCol ? (
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                            gap: 2,
-                            flexWrap: "nowrap",
-                          }}
-                        >
-                          {exportFilename && (
-                            <button
-                              type="button"
-                              onClick={exportCsv}
-                              style={styles.btnRowAction}
-                              title="Export CSV"
-                            >
-                              <IconDownload />
-                            </button>
-                          )}
-                          {printTitle !== undefined && (
-                            <button
-                              type="button"
-                              onClick={doPrint}
-                              style={styles.btnRowAction}
-                              title="Print"
-                            >
-                              <IconPrint />
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        "Actions"
-                      )}
+                      Actions
                     </th>
                   )}
                 </tr>
