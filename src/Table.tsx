@@ -614,7 +614,8 @@ export function Table<T extends object>({
                 style={{
                   display: "flex",
                   justifyContent: "flex-end",
-                  padding: "6px 6px 2px",
+                  /* No horizontal padding — slot lines up with Actions column (same 6px inset as row cells). */
+                  padding: "6px 0 2px",
                   boxSizing: "border-box",
                 }}
               >
