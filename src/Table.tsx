@@ -211,6 +211,7 @@ export function Table<T extends object>({
   const filterRowRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [actionsSticky, setActionsSticky] = useState(false);
+  const actionsStickyRef = useRef(false);
   /** Desktop list hubs: filter band must not extend past the table Actions column. */
   const [filterBandPx, setFilterBandPx] = useState<number | undefined>();
   /** Match toolbar + filter bar to table width (not full viewport / empty card chrome). */
@@ -251,11 +252,28 @@ export function Table<T extends object>({
   useLayoutEffect(() => {
     const el = scrollWrapRef.current;
     if (!el || !actions) {
+      actionsStickyRef.current = false;
       setActionsSticky(false);
       return;
     }
+    // Compact lookup cards hug content width — sticky Actions + 1px border toggling caused jitter.
+    if (compactTableShell) {
+      actionsStickyRef.current = false;
+      setActionsSticky(false);
+      return;
+    }
+    const OVERFLOW_STICKY_ON_PX = 4;
+    const OVERFLOW_STICKY_OFF_PX = 1;
     const measureSticky = () => {
-      setActionsSticky(el.scrollWidth > el.clientWidth + 1);
+      const overflow = el.scrollWidth - el.clientWidth;
+      const prev = actionsStickyRef.current;
+      let next = prev;
+      if (!prev && overflow > OVERFLOW_STICKY_ON_PX) next = true;
+      else if (prev && overflow <= OVERFLOW_STICKY_OFF_PX) next = false;
+      if (next !== prev) {
+        actionsStickyRef.current = next;
+        setActionsSticky(next);
+      }
     };
     measureSticky();
     const ro = new ResizeObserver(measureSticky);
@@ -263,7 +281,7 @@ export function Table<T extends object>({
     const table = el.querySelector("table");
     if (table) ro.observe(table);
     return () => ro.disconnect();
-  }, [actions, columns, data, isLoading, sorted.length]);
+  }, [actions, columns, data, isLoading, sorted.length, compactTableShell]);
 
   useLayoutEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
