@@ -41,8 +41,8 @@
 }
 
 .parivaar-form-value {
-  min-height: 40px;
-  padding: 8px 0;
+  min-height: 36px;
+  padding: 6px 0;
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary, var(--text, #1a2530));
