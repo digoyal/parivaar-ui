@@ -36,6 +36,19 @@
 .form-grid.cols-2 {
   grid-template-columns: repeat(2, 1fr);
 }
+.form-grid.cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.parivaar-form-value {
+  min-height: 40px;
+  padding: 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, var(--text, #1a2530));
+  display: flex;
+  align-items: center;
+}
 .form-grid .full,
 .parivaar-form-field--full {
   grid-column: 1 / -1;
@@ -69,7 +82,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 16px;
-  background: var(--bg-input, var(--surface, #fff));
+  background: var(--surface, var(--bg-card, #fff));
   color: var(--text-primary, var(--text, #1a2530));
   outline: none;
   box-sizing: border-box;
@@ -101,6 +114,9 @@
 
 @media (max-width: 768px) {
   .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .form-grid.cols-5 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
