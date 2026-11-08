@@ -1,0 +1,118 @@
+/**
+ * Shared Add/Edit form layout (Teachers-style).
+ * Host apps import once; map tokens (--brand, --border, --surface, …) in :root.
+ */
+
+.grs-form,
+.parivaar-form {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.form-section {
+  margin-top: 14px;
+}
+.form-section:first-child {
+  margin-top: 0;
+}
+
+.form-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--link-color, var(--brand, #1c4e6b));
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 16px;
+}
+.form-grid.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.form-grid .full,
+.parivaar-form-field--full {
+  grid-column: 1 / -1;
+}
+
+.parivaar-form-field,
+.form-grid .field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.parivaar-form-field label,
+.form-grid .field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, var(--text-muted, #5a6a7a));
+}
+
+.parivaar-ui-form-control,
+.parivaar-form-field input,
+.parivaar-form-field select,
+.parivaar-form-field textarea,
+.form-grid .field input,
+.form-grid .field select,
+.form-grid .field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 16px;
+  background: var(--bg-input, var(--surface, #fff));
+  color: var(--text-primary, var(--text, #1a2530));
+  outline: none;
+  box-sizing: border-box;
+}
+
+.parivaar-ui-form-control:focus,
+.parivaar-form-field input:focus,
+.parivaar-form-field select:focus,
+.parivaar-form-field textarea:focus,
+.form-grid .field input:focus,
+.form-grid .field select:focus,
+.form-grid .field textarea:focus {
+  border-color: var(--link-color, var(--brand, #1c4e6b));
+  box-shadow: 0 0 0 2px rgba(28, 78, 107, 0.12);
+}
+
+.parivaar-form-field textarea,
+.form-grid .field textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.parivaar-form-field--mono input,
+.parivaar-form-field--mono .parivaar-ui-form-control,
+.form-grid .field.mono input {
+  font-family: "Roboto Mono", ui-monospace, monospace;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid,
+  .form-grid.cols-2,
+  .form-grid.cols-3 {
+    grid-template-columns: 1fr;
+  }
+  .form-grid > .parivaar-form-field,
+  .form-grid > .field {
+    grid-column: 1 / -1;
+  }
+}

@@ -23,6 +23,12 @@
       "production": "./src/report-shell.css",
       "import": "./src/report-shell.css",
       "default": "./src/report-shell.css"
+    },
+    "./form-shell.css": {
+      "development": "./src/form-shell.css",
+      "production": "./src/form-shell.css",
+      "import": "./src/form-shell.css",
+      "default": "./src/form-shell.css"
     }
   },
   "files": [
