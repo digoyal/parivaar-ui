@@ -42,17 +42,19 @@ export function FormSection({ title, children, intro, className, style }: FormSe
 export interface FormGridProps {
   children: ReactNode;
   /** Column count at desktop width. Default 3. */
-  columns?: 2 | 3 | 5;
+  columns?: 1 | 2 | 3 | 5;
   className?: string;
 }
 
 export function FormGrid({ children, columns = 3, className }: FormGridProps) {
   const cols =
-    columns === 2
-      ? "form-grid cols-2"
-      : columns === 5
-        ? "form-grid cols-5"
-        : "form-grid";
+    columns === 1
+      ? "form-grid cols-1"
+      : columns === 2
+        ? "form-grid cols-2"
+        : columns === 5
+          ? "form-grid cols-5"
+          : "form-grid";
   return <div className={[cols, className].filter(Boolean).join(" ")}>{children}</div>;
 }
 

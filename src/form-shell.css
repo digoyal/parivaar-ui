@@ -33,6 +33,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 10px 16px;
 }
+.form-grid.cols-1 {
+  grid-template-columns: 1fr;
+}
 .form-grid.cols-2 {
   grid-template-columns: repeat(2, 1fr);
 }
@@ -69,6 +72,8 @@
   color: var(--text-secondary, var(--text-muted, #5a6a7a));
 }
 
+.grs-form .parivaar-ui-form-control,
+.parivaar-form .parivaar-ui-form-control,
 .parivaar-ui-form-control,
 .parivaar-form-field input,
 .parivaar-form-field select,
@@ -77,8 +82,8 @@
 .form-grid .field select,
 .form-grid .field textarea {
   width: 100%;
-  padding: 8px 10px;
-  min-height: 40px;
+  padding: 6px 10px;
+  min-height: 36px;
   border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 16px;
