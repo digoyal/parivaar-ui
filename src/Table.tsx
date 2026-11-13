@@ -60,6 +60,16 @@ interface TableProps<T> {
   activeFilterCount?: number;
   /** Filename for CSV export (without .csv). Omit to hide export button. */
   exportFilename?: string;
+  /**
+   * CSV column set (e.g. full field registry). Defaults to visible `columns`.
+   * On-screen column config does not affect export when this is set.
+   */
+  exportColumns?: Col<T>[];
+  /**
+   * Fetch all rows matching current list filters for CSV (server-paginated hubs).
+   * When omitted, export uses client-filtered `sorted` rows (full in-memory dataset).
+   */
+  getExportRows?: () => Promise<T[]>;
   /** Title shown in the print window. Omit to hide print button. */
   printTitle?: string;
   /** Extra controls rendered in the header after print, before the add button. */
@@ -192,7 +202,7 @@ export function Table<T extends object>({
   columns, data, rowKey,
   isLoading, emptyMessage = "No records found.",
   searchable, searchPlaceholder = "Search…", searchFn, externalSearch, onExternalSearch,
-  filters, activeFilterCount = 0, exportFilename, printTitle,
+  filters, activeFilterCount = 0, exportFilename, exportColumns, getExportRows, printTitle,
   onAdd, addLabel = "+ Add", headerExtra,
   actions,
   pagination,
@@ -218,6 +228,9 @@ export function Table<T extends object>({
   const [shellWidth, setShellWidth] = useState<number | undefined>();
   /** Phone/tablet: full-width card; desktop may hug sparse column sets. */
   const [fullWidthShell, setFullWidthShell] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
+
+  const csvCols = exportColumns ?? columns;
 
   // ── Filter (externalSearch = server-side; skip client filtering)
   const activeQuery = externalSearch !== undefined ? externalSearch : query;
@@ -324,21 +337,41 @@ export function Table<T extends object>({
     else { setSortKey(key); setSortDir("asc"); }
   }
 
-  // ── Export CSV
-  function exportCsv() {
-    const headers = columns.map(c => csvEscape(c.label));
-    const rows = sorted.map(row =>
-      columns.map(c =>
+  function csvRowsFromData(rows: T[]) {
+    return rows.map((row) =>
+      csvCols.map((c) =>
         c.csvValue
           ? csvEscape(c.csvValue(row))
-          : csvEscape(String((row as Record<string, unknown>)[c.key] ?? ""))
-      )
+          : csvEscape(String((row as Record<string, unknown>)[c.key] ?? "")),
+      ),
     );
-    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+  }
+
+  function downloadCsv(rows: T[]) {
+    const headers = csvCols.map((c) => csvEscape(c.label));
+    const csv = [headers, ...csvRowsFromData(rows)].map((r) => r.join(",")).join("\n");
     const a = document.createElement("a");
     a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
     a.download = (exportFilename ?? "export") + ".csv";
     a.click();
+  }
+
+  // ── Export CSV
+  async function exportCsv() {
+    if (exportBusy) return;
+    if (getExportRows) {
+      setExportBusy(true);
+      try {
+        const rows = await getExportRows();
+        downloadCsv(rows);
+      } catch {
+        window.alert("Export failed. Please try again.");
+      } finally {
+        setExportBusy(false);
+      }
+      return;
+    }
+    downloadCsv(sorted);
   }
 
   // ── Print
@@ -460,7 +493,7 @@ export function Table<T extends object>({
       }}
     >
       {exportFilename && (
-        <button type="button" onClick={exportCsv} style={styles.btnRowAction} title="Export CSV">
+        <button type="button" onClick={exportCsv} disabled={exportBusy} style={styles.btnRowAction} title="Export CSV">
           <IconDownload />
         </button>
       )}
@@ -526,7 +559,7 @@ export function Table<T extends object>({
         )}
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
           {!exportPrintInActionsCol && exportFilename && (
-            <button onClick={exportCsv} style={styles.btnIcon} title="Export CSV">
+            <button onClick={exportCsv} disabled={exportBusy} style={styles.btnIcon} title="Export CSV">
               <IconDownload />
             </button>
           )}
