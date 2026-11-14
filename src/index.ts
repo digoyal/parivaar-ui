@@ -49,3 +49,8 @@ export {
   ReportFiltersBar,
   type ReportFiltersBarProps,
 } from "./ReportFiltersBar";
+export {
+  MultiSelectList,
+  type MultiSelectListItem,
+  type MultiSelectListProps,
+} from "./MultiSelectList";

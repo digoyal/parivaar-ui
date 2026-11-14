@@ -29,6 +29,12 @@
       "production": "./src/form-shell.css",
       "import": "./src/form-shell.css",
       "default": "./src/form-shell.css"
+    },
+    "./multi-select-list.css": {
+      "development": "./src/multi-select-list.css",
+      "production": "./src/multi-select-list.css",
+      "import": "./src/multi-select-list.css",
+      "default": "./src/multi-select-list.css"
     }
   },
   "files": [
