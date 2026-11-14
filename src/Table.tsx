@@ -31,6 +31,12 @@ export interface Col<T> {
   wrap?: boolean;
   /** Minimum column width (px or CSS length). Prefer with nowrap on list-hub tables so grow col absorbs shrink. */
   minWidth?: number | string;
+  /** Column width cap (px or CSS length). Applied to header and body when set (overrides list-hub default max). */
+  maxWidth?: number | string;
+  /** Fixed column width for `table-layout: fixed` (px or CSS length). */
+  width?: number | string;
+  /** Extra `<th>` style overrides (ellipsis caps for long labels). */
+  thStyle?: React.CSSProperties;
 }
 
 interface TableProps<T> {
@@ -95,6 +101,8 @@ interface TableProps<T> {
   shellFullWidth?: boolean;
   /** Short lookup lists: card hugs table; export/print directly above thead (not a full-width filter band). */
   compactTableShell?: boolean;
+  /** Use fixed table layout so explicit column widths are honored (wide multi-column reports). */
+  tableLayout?: "auto" | "fixed";
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -127,15 +135,16 @@ function colTextCellStyle<T>(
   const nowrap = allowWrap ? false : (col.nowrap ?? listHubDesktop);
 
   if (nowrap) {
+    const cappedMax =
+      col.maxWidth ?? tdExtras?.maxWidth ?? (listHubDesktop ? DATA_COL_MAX_PX : undefined);
     return {
       wordBreak: "normal",
       overflowWrap: "normal",
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
-      maxWidth: listHubDesktop
-        ? (tdExtras?.maxWidth ?? DATA_COL_MAX_PX)
-        : undefined,
+      ...(col.width != null ? { width: col.width } : {}),
+      maxWidth: cappedMax,
       minWidth:
         col.minWidth ??
         tdExtras?.minWidth ??
@@ -163,12 +172,20 @@ function colHeaderStyle<T>(col: Col<T>, listHubDesktop: boolean): React.CSSPrope
    */
   const skipHeaderMaxCap = typeof col.tdStyle === "function";
   if (nowrap) {
+    const headerMax =
+      col.maxWidth ??
+      tdExtras?.maxWidth ??
+      (skipHeaderMaxCap || !listHubDesktop ? undefined : DATA_COL_MAX_PX);
     return {
-      ...(skipHeaderMaxCap || !listHubDesktop ? {} : { maxWidth: DATA_COL_MAX_PX }),
+      ...(headerMax != null ? { maxWidth: headerMax } : {}),
+      ...(col.width != null ? { width: col.width } : {}),
       minWidth:
         col.minWidth ??
         tdExtras?.minWidth ??
         (listHubDesktop ? 72 : ("max-content" as const)),
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
     };
   }
   return {
@@ -209,6 +226,7 @@ export function Table<T extends object>({
   totalCount,
   shellFullWidth = false,
   compactTableShell = false,
+  tableLayout = "auto",
 }: TableProps<T>) {
 
   const [query, setQuery] = useState("");
@@ -309,6 +327,7 @@ export function Table<T extends object>({
   /** Full-width card + banded filters: stretch table; grow col before Actions. */
   const listHubDesktop = effectiveShellFullWidth && !fullWidthShell;
   const listHubDesktopGrow = listHubDesktop && !!actions;
+  const tableStretch = listHubDesktopGrow;
 
   useLayoutEffect(() => {
     if (expandShell) {
@@ -655,7 +674,7 @@ export function Table<T extends object>({
           <div ref={scrollWrapRef} style={{ overflowX: "auto" }}>
             <div
               style={{
-                width: listHubDesktopGrow ? "100%" : "max-content",
+                width: tableStretch ? "100%" : "max-content",
                 maxWidth: "100%",
               }}
             >
@@ -685,10 +704,10 @@ export function Table<T extends object>({
                 .filter(Boolean)
                 .join(" ")}
               style={{
-                width: listHubDesktopGrow ? "100%" : "max-content",
+                width: tableStretch ? "100%" : "max-content",
                 maxWidth: "none",
                 borderCollapse: "collapse",
-                tableLayout: "auto",
+                tableLayout,
               }}
             >
               <thead>
@@ -700,6 +719,7 @@ export function Table<T extends object>({
                       style={{
                         ...styles.th,
                         ...colHeaderStyle(col, listHubDesktop),
+                        ...col.thStyle,
                         cursor: col.sortable ? "pointer" : "default",
                         userSelect: "none",
                       }}
