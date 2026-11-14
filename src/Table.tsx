@@ -103,6 +103,8 @@ interface TableProps<T> {
   compactTableShell?: boolean;
   /** Use fixed table layout so explicit column widths are honored (wide multi-column reports). */
   tableLayout?: "auto" | "fixed";
+  /** Desktop full-width shell: stretch table (grow column) without an Actions column. */
+  listHubGrow?: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -227,6 +229,7 @@ export function Table<T extends object>({
   shellFullWidth = false,
   compactTableShell = false,
   tableLayout = "auto",
+  listHubGrow = false,
 }: TableProps<T>) {
 
   const [query, setQuery] = useState("");
@@ -326,7 +329,7 @@ export function Table<T extends object>({
   const expandShell = fullWidthShell || effectiveShellFullWidth;
   /** Full-width card + banded filters: stretch table; grow col before Actions. */
   const listHubDesktop = effectiveShellFullWidth && !fullWidthShell;
-  const listHubDesktopGrow = listHubDesktop && !!actions;
+  const listHubDesktopGrow = listHubDesktop && (!!actions || listHubGrow);
   const tableStretch = listHubDesktopGrow;
 
   useLayoutEffect(() => {
@@ -420,9 +423,9 @@ export function Table<T extends object>({
   }
 
   const hasSearch = searchable || filters;
-  /** Export/print above thead, right-aligned in the Actions column (not in the page title). */
-  const exportPrintInActionsCol =
-    !!actions && (!!exportFilename || printTitle !== undefined);
+  const hasExportPrint = !!exportFilename || printTitle !== undefined;
+  /** Export/print in the filter row only when an Actions column exists (aligned to Actions). */
+  const exportPrintInActionsCol = hasExportPrint && !!actions;
   const exportAboveTable = exportPrintInActionsCol && !hasSearch;
   const showFilterRow = hasSearch;
 
