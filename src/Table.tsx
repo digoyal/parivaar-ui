@@ -674,11 +674,17 @@ export function Table<T extends object>({
         {isLoading ? (
           <div style={{ padding: 40, textAlign: "center", ...styles.muted }}>Loading…</div>
         ) : (
-          <div ref={scrollWrapRef} style={{ overflowX: "auto" }}>
+          <div
+            ref={scrollWrapRef}
+            className="grs-table-hscroll"
+            style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}
+          >
             <div
+              className="grs-table-hscroll-inner"
               style={{
                 width: tableStretch ? "100%" : "max-content",
-                maxWidth: "100%",
+                maxWidth: tableStretch ? "100%" : "none",
+                minWidth: tableStretch ? undefined : "min(100%, max-content)",
               }}
             >
             {exportAboveTable && (

@@ -4,6 +4,16 @@
   min-width: 0;
 }
 
+.grs-table-hscroll {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.grs-table-hscroll-inner {
+  box-sizing: border-box;
+}
+
 .grs-filter-row {
   display: flex;
   flex-wrap: nowrap;
