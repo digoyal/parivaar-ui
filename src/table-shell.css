@@ -6,12 +6,64 @@
 
 .grs-table-hscroll {
   overflow-x: auto;
+  overflow-y: visible;
   max-width: 100%;
+  min-width: 0;
   -webkit-overflow-scrolling: touch;
+}
+
+/*
+ * Desktop list hubs (shellFullWidth): many rows push the native horizontal
+ * scrollbar to the bottom of a tall table; users must scroll the page main to
+ * reach it. Cap this scrollport to the viewport so vertical scroll stays inside
+ * the card and the h-scrollbar remains on-screen. Apps may tune
+ * --grs-list-hub-table-chrome (title, filters, pagination, page padding).
+ */
+@media (min-width: 769px) {
+  .ui-table-shell--full-width {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ui-table-shell--full-width .grs-table-card {
+    flex: 1 1 0%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .ui-table-shell--full-width .grs-table-hscroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(100svh - var(--grs-list-hub-table-chrome, 17.5rem));
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  /*
+   * List hubs: table width 100% + grow col on wide viewports. Inner uses
+   * fit-content with a 100% floor so the scrollport does not gain phantom
+   * overflow (min-width: max-content on table/inner forced h-scroll when the
+   * window was already wider than the grid). Below 100% width, inner grows with
+   * column min widths and overflow-x: auto shows the bar.
+   */
+  .ui-table-shell--full-width table.ui-table.ui-table--list-hub-grow {
+    width: 100%;
+    max-width: none;
+  }
+
+  .ui-table-shell--full-width .grs-table-hscroll-inner:has(.ui-table--list-hub-grow) {
+    width: fit-content;
+    min-width: 100%;
+    max-width: none;
+  }
 }
 
 .grs-table-hscroll-inner {
   box-sizing: border-box;
+  min-width: 0;
 }
 
 .grs-filter-row {

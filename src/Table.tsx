@@ -599,7 +599,9 @@ export function Table<T extends object>({
       )}
 
       {/* ── Table card (search/filters sit inside so width matches the grid) ── */}
-      <div style={{
+      <div
+        className="grs-table-card"
+        style={{
         background: "var(--bg-card)",
         border: "1px solid var(--border)",
         borderRadius: 10,
@@ -677,14 +679,18 @@ export function Table<T extends object>({
           <div
             ref={scrollWrapRef}
             className="grs-table-hscroll"
-            style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}
+            style={{
+              overflowX: "auto",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+            }}
           >
             <div
               className="grs-table-hscroll-inner"
               style={{
-                width: tableStretch ? "100%" : "max-content",
-                maxWidth: tableStretch ? "100%" : "none",
-                minWidth: tableStretch ? undefined : "min(100%, max-content)",
+                width: tableStretch ? "fit-content" : "max-content",
+                maxWidth: "none",
+                minWidth: tableStretch ? "100%" : "min(100%, max-content)",
               }}
             >
             {exportAboveTable && (
